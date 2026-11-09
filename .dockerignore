@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+**/dist
+**/coverage
+**/*.log
+aplicacao-poi
+docs
+apps/backend/test

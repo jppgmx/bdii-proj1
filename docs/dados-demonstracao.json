@@ -1,0 +1,166 @@
+{
+  "origem": "Nomes de referência e coordenadas de locais reais fornecidos pelo usuário. Os pontos de demonstração não confirmam paradas oficiais de ônibus.",
+  "universidades": [
+    {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "nome": "Instituto Federal de Educação, Ciência e Tecnologia do Sertão Paraibano",
+      "sigla": "IFSertãoPB",
+      "campus": "Cajazeiras"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000002",
+      "nome": "Universidade Federal de Campina Grande",
+      "sigla": "UFCG",
+      "campus": "Cajazeiras"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "nome": "Faculdade São Francisco da Paraíba",
+      "sigla": "FASP",
+      "campus": "Cajazeiras"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000004",
+      "nome": "Faculdade Católica da Paraíba",
+      "sigla": "FAFIC",
+      "campus": "Cajazeiras"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000005",
+      "nome": "Faculdade Santa Maria",
+      "sigla": "UNIFSM",
+      "campus": "Cajazeiras"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000006",
+      "nome": "Universidade Federal de Campina Grande",
+      "sigla": "UFCG",
+      "campus": "Sousa"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000007",
+      "nome": "Instituto Federal de Educação, Ciência e Tecnologia do Sertão Paraibano",
+      "sigla": "IFSertãoPB",
+      "campus": "Sousa"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000008",
+      "nome": "Instituto Federal de Educação, Ciência e Tecnologia do Sertão Paraibano",
+      "sigla": "IFSertãoPB",
+      "campus": "São Gonçalo (Sousa)"
+    }
+  ],
+  "paradas": [
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "nome": "Ponto de demonstração — IFSertãoPB Cajazeiras",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000001",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.54534133432616,
+          -6.889266108880796
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000002",
+      "nome": "Ponto de demonstração — UFCG Cajazeiras",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000002",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.559004991996964,
+          -6.873302617195168
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000003",
+      "nome": "Ponto de demonstração — FASP Cajazeiras",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000003",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.542107359470364,
+          -6.873510720708899
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000004",
+      "nome": "Ponto de demonstração — FAFIC Cajazeiras",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000004",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.56280293432631,
+          -6.883182320508749
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000005",
+      "nome": "Ponto de demonstração — UNIFSM Cajazeiras",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000005",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.548557090151256,
+          -6.898852476927565
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000006",
+      "nome": "Ponto de demonstração — UFCG Sousa",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000006",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.259559676174476,
+          -6.782534424138256
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000007",
+      "nome": "Ponto de demonstração — IFSertãoPB Sousa",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000007",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.23064594413226,
+          -6.779663055546379
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000008",
+      "nome": "Ponto de demonstração — IFSertãoPB São Gonçalo (Sousa)",
+      "descricao": "Local fornecido pelo usuário; não representa uma parada oficial confirmada.",
+      "universidade_id": "10000000-0000-4000-8000-000000000008",
+      "localizacao": {
+        "type": "Point",
+        "coordinates": [
+          -38.29433560364672,
+          -6.839964058520175
+        ]
+      }
+    }
+  ],
+  "onibus": [
+    {
+      "id": "30000000-0000-4000-8000-000000000001",
+      "identificacao": "DEMO-01",
+      "universidade_id": "10000000-0000-4000-8000-000000000001"
+    }
+  ]
+}

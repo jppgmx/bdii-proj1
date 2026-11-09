@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgis/postgis:17-3.6
+    environment:
+      POSTGRES_DB: ${PG_DATABASE:?Defina PG_DATABASE no .env}
+      POSTGRES_USER: ${PG_USER:?Defina PG_USER no .env}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?Defina PG_PASSWORD no .env}
+    ports:
+      - "127.0.0.1:${PG_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/001-postgis.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  app:
+    build:
+      context: .
+      target: ${APP_BUILD_TARGET:-backend}
+    environment:
+      NODE_ENV: production
+      API_PORT: 3000
+      PG_HOST: db
+      PG_PORT: 5432
+      PG_DATABASE: ${PG_DATABASE:?Defina PG_DATABASE no .env}
+      PG_USER: ${PG_USER:?Defina PG_USER no .env}
+      PG_PASSWORD: ${PG_PASSWORD:?Defina PG_PASSWORD no .env}
+      PG_SSL: "false"
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
