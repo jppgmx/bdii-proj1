@@ -225,9 +225,9 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **João Paulo**
 
-- [ ] Implementar consulta parametrizada com posição do usuário, raio em metros e `bbox`.
-- [ ] Validar raio positivo e limite máximo no contrato; filtrar com `ST_DWithin`, calcular distância e ordenar os resultados.
-- [ ] Criar índice para a consulta em `geography` e verificar pontos dentro, fora e na borda do raio com dados controlados.
+- [x] Implementar consulta parametrizada com posição do usuário, raio em metros e `bbox`.
+- [x] Validar raio positivo e limite máximo no contrato; filtrar com `ST_DWithin`, calcular distância e ordenar os resultados.
+- [x] Criar índice para a consulta em `geography` e verificar pontos dentro, fora e na borda do raio com dados controlados.
 
 **Millena Kelly**
 
@@ -238,6 +238,8 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 - [ ] Quando não houver geolocalização, explicar a indisponibilidade; não tratar o centro de Cajazeiras como posição real do usuário.
 
 **Concluída quando:** o servidor retorna somente paradas dentro do raio e da área visível, com distâncias em metros.
+
+**Verificação do backend na `etapa-4`:** 21 testes locais e quatro testes de integração com PostGIS real aprovados. Validados os cenários de 500 m, 2 km, 5 km e limite de 50 km; distância zero; desempate por ID; filtros de raio e área combinados, inclusive origem fora da área visível; ponto na borda de 1000 m e exclusão a 1000,01 m. Build, migração do índice e consulta após recriar aplicação/banco aprovados. T07 concluída; T08 permanece com Millena Kelly, sem alterações no frontend.
 
 ### Etapa 5 — Completar a temática com ônibus de posição manual
 
