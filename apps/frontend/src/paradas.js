@@ -46,15 +46,19 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   return data;
 }
 
-export function latestRequest(requestId, request, onSuccess, onError) {
+export function latestRequest(requestId, request, onSuccess, onError, onStart) {
   let controller;
+  let lastKey;
 
-  async function run(...args) {
+  async function run(key) {
+    if (key === lastKey) return;
+    lastKey = key;
     const id = ++requestId.current;
     controller?.abort();
     controller = new AbortController();
+    onStart?.();
     try {
-      const result = await request(controller.signal, ...args);
+      const result = await request(controller.signal, key);
       if (id === requestId.current) onSuccess(result);
     } catch (error) {
       if (id === requestId.current) onError(error);
@@ -63,6 +67,7 @@ export function latestRequest(requestId, request, onSuccess, onError) {
 
   function cancel() {
     requestId.current += 1;
+    lastKey = undefined;
     controller?.abort();
   }
 

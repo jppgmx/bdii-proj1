@@ -65,15 +65,15 @@ export default function App() {
 
   const [stopRequests] = useState(() => latestRequest(
     requestId,
-    (signal, bbox, filter) => api(stopsUrl(bbox, filter), { signal }),
+    (signal, url) => api(url, { signal }),
     (items) => setStopList({ items }),
     (error) => setStopList({ items: [], error: error.message }),
+    () => setStopList({ loading: true, items: [] }),
   ));
 
   const loadStops = useCallback((bbox) => {
     bounds.current = bbox;
-    setStopList({ loading: true, items: [] });
-    stopRequests.run(bbox, proximity.current);
+    stopRequests.run(stopsUrl(bbox, proximity.current));
   }, [stopRequests]);
 
   useEffect(() => () => stopRequests.cancel(), [stopRequests]);
@@ -104,7 +104,10 @@ export default function App() {
   }
 
   function refreshStops() {
-    if (bounds.current) loadStops(bounds.current);
+    if (bounds.current) {
+      stopRequests.cancel();
+      loadStops(bounds.current);
+    }
   }
 
   function selectRadius(nextRadius) {
@@ -113,8 +116,11 @@ export default function App() {
     stopRequests.cancel();
     setRadius(nextRadius);
     // Enquadrar o círculo dispara moveend com a nova área visível.
-    if (nextRadius === null) refreshStops();
-    else setStopList({ loading: true, items: [] });
+    if (nextRadius === null) {
+      if (bounds.current) loadStops(bounds.current);
+    } else {
+      setStopList({ loading: true, items: [] });
+    }
   }
 
   function addUniversity(university) {
