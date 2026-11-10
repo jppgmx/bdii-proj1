@@ -64,3 +64,30 @@ test('falha de rede chama o tratamento de erro', async (t) => {
   assert.equal(errors[0].message, 'Não foi possível conectar à API.');
   assert.equal(errors[0].status, undefined);
 });
+
+test('repetir a mesma busca explícita entrega uma nova resposta', async (t) => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => Response.json([first]));
+  const results = [];
+  const search = locationSearch((items) => results.push(items), assert.fail);
+  await search.run('Vila de Exemplo');
+  await search.run('Vila de Exemplo');
+  assert.equal(fetch.mock.callCount(), 2);
+  assert.deepEqual(results, [[first], [first]]);
+});
+
+test('cancelar a busca descarta sua resposta pendente e permite repetir a consulta', async (t) => {
+  const pending = [];
+  t.mock.method(globalThis, 'fetch', (_url, { signal }) => new Promise((resolve) => pending.push({ signal, resolve })));
+  const results = [];
+  const search = locationSearch((items) => results.push(items), assert.fail);
+  const cancelled = search.run('Vila de Exemplo');
+  search.cancel();
+  assert.equal(pending[0].signal.aborted, true);
+  pending[0].resolve(Response.json([first]));
+  await cancelled;
+  assert.deepEqual(results, []);
+  const repeated = search.run('Vila de Exemplo');
+  pending[1].resolve(Response.json([second]));
+  await repeated;
+  assert.deepEqual(results, [[second]]);
+});

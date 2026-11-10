@@ -7,6 +7,16 @@ export function bboxFromBounds(bounds) {
   ].join(',');
 }
 
+export function stopsUrl(bbox, proximity) {
+  if (!proximity) return `/api/paradas?bbox=${bbox}`;
+  const { position: { lat, lng }, radius } = proximity;
+  return `/api/paradas/proximas?lat=${lat}&lng=${lng}&raio_m=${radius}&bbox=${bbox}`;
+}
+
+export function formatDistance(meters) {
+  return `${Math.round(meters)} m`;
+}
+
 export async function api(path, { method = 'GET', body, signal } = {}) {
   let response;
   try {
@@ -38,22 +48,32 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   return data;
 }
 
-export function latestRequest(request, onSuccess, onError) {
-  let current;
+export function latestRequest(requestId, request, onSuccess, onError, onStart) {
+  let controller;
+  let lastKey;
 
-  async function run(...args) {
-    current?.abort();
-    const controller = new AbortController();
-    current = controller;
+  async function run(key) {
+    if (key === lastKey) return;
+    lastKey = key;
+    const id = ++requestId.current;
+    controller?.abort();
+    controller = new AbortController();
+    onStart?.();
     try {
-      const result = await request(controller.signal, ...args);
-      if (!controller.signal.aborted) onSuccess(result);
+      const result = await request(controller.signal, key);
+      if (id === requestId.current) onSuccess(result);
     } catch (error) {
-      if (!controller.signal.aborted) onError(error);
+      if (id === requestId.current) onError(error);
     }
   }
 
-  return { run, cancel: () => current?.abort() };
+  function cancel() {
+    requestId.current += 1;
+    lastKey = undefined;
+    controller?.abort();
+  }
+
+  return { run, cancel };
 }
 
 export function pointToLatLng({ coordinates: [lng, lat] }) {
