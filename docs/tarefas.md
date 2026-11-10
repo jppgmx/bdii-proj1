@@ -18,7 +18,7 @@ Backlog definido na etapa 0 para o repositório `jppgmx/bdii-proj1`. Cada seçã
 | T12 | [#12](https://github.com/jppgmx/bdii-proj1/issues/12) | 7 — Demonstração e entrega |
 | T13 | [#13](https://github.com/jppgmx/bdii-proj1/issues/13) | 0 — Conferência do enunciado |
 
-T05 (geocodificação Nominatim) está implementada e validada no backend da `etapa-3`; o frontend permanece com Millena Kelly; T03 (universidades e CRUD espacial de paradas) está implementada e validada com PostGIS real na `etapa-2`; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
+T07 (proximidade em metros) está implementada no backend da `etapa-4`; T05 (geocodificação Nominatim) está implementada e validada na `etapa-3`; o frontend permanece com Millena Kelly; T03 (universidades e CRUD espacial de paradas) está implementada e validada com PostGIS real na `etapa-2`; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
 
 ## T01 — [Etapa 1][Backend] Preparar Express, PostGIS e Docker
 
@@ -114,11 +114,11 @@ T05 (geocodificação Nominatim) está implementada e validada no backend da `et
 
 **Dependências:** T03; executar após a etapa 3.
 
-- [ ] Implementar `/api/paradas/proximas` antes da rota por ID.
-- [ ] Validar origem, raio de até 50000 m e `bbox` obrigatório.
-- [ ] Combinar área visível e `ST_DWithin` em `geography`, com índice compatível.
-- [ ] Retornar `distancia_m` calculada no banco e ordenar por distância e ID.
-- [ ] Conferir os cenários reais documentados e um ponto controlado exatamente na borda do raio.
+- [x] Implementar `/api/paradas/proximas` antes da rota por ID.
+- [x] Validar origem, raio de até 50000 m e `bbox` obrigatório.
+- [x] Combinar área visível e `ST_DWithin` em `geography`, com índice compatível.
+- [x] Retornar `distancia_m` calculada no banco e ordenar por distância e ID.
+- [x] Conferir os cenários reais documentados e um ponto controlado exatamente na borda do raio.
 
 **Aceite:** distâncias são calculadas em metros e os dois filtros são aplicados no servidor, incluindo o limite exato.
 

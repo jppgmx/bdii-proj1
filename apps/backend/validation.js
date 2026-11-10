@@ -67,3 +67,23 @@ export function bboxInput(value) {
       west < -180 || east > 180 || south < -90 || north > 90) fail();
   return bounds;
 }
+
+export function proximityInput(query) {
+  function number(field, min, max) {
+    const raw = query[field];
+    if (typeof raw !== 'string' || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(raw.trim())) {
+      invalid(field, 'Informe um número válido.');
+    }
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value < min || value > max || (field === 'raio_m' && value === 0)) {
+      invalid(field, field === 'raio_m' ? 'Informe um raio maior que zero e de até 50000 metros.' : `Informe um valor entre ${min} e ${max}.`);
+    }
+    return value;
+  }
+  return {
+    lat: number('lat', -90, 90),
+    lng: number('lng', -180, 180),
+    raio_m: number('raio_m', 0, 50000),
+    bbox: bboxInput(query.bbox),
+  };
+}

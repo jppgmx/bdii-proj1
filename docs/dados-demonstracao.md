@@ -47,4 +47,4 @@ São oito registros no recurso `universidades`, um para cada instituição/campu
 
 A origem da busca por raio acima é uma **localização simulada para demonstração**. Na aplicação normal, usar a posição autorizada pelo navegador; não substituir a posição real do usuário pela coordenada de uma instituição.
 
-Esses cenários dependem somente deste conjunto, sem cadastros extras. Os resultados por raio serão conferidos com PostGIS na etapa 4. Para testar exatamente a borda do raio, construir um ponto controlado no banco nessa etapa; as coordenadas reais não devem ser alteradas para forçar esse caso.
+Esses cenários dependem somente deste conjunto, sem cadastros extras. Os resultados por raio foram conferidos com PostGIS na etapa 4. A integração da etapa 4 usa pontos controlados gerados por `ST_Project`, incluindo um a 1000 m e outro a 1000,01 m, para conferir a inclusão da borda e exclusão do ponto externo; as coordenadas reais não devem ser alteradas para forçar esse caso.

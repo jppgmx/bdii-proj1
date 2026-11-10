@@ -57,6 +57,15 @@ assert.equal((await fetch(base)).status, 404);
 const paradas = await fetch(`${base}/api/paradas?bbox=-38.58,-6.91,-38.22,-6.77`);
 assert.equal(paradas.status, 200);
 assert.equal((await paradas.json()).length, 8);
+const proximas = await fetch(`${base}/api/paradas/proximas?${new URLSearchParams({
+  lat: '-6.889266108880796', lng: '-38.54534133432616', raio_m: '2000', bbox: '-38.58,-6.91,-38.53,-6.86',
+})}`);
+assert.equal(proximas.status, 200);
+const nearby = await proximas.json();
+assert.deepEqual(nearby.map(row => row.id), [1, 5, 3].map(n => `20000000-0000-4000-8000-${String(n).padStart(12, '0')}`));
+assert.equal(nearby[0].distancia_m, 0);
+assert.ok(nearby.every(row => typeof row.distancia_m === 'number' && row.distancia_m <= 2000));
+console.log('Proximidade validada após recriar aplicação e banco.');
 console.log('Oito paradas preservadas após recriar aplicação e banco.');
 console.log('Saúde, API JSON e execução sem React verificadas na imagem.');
 JS

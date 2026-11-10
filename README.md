@@ -8,11 +8,11 @@ O React será configurado por Millena Kelly, responsável pelo frontend. O Docke
 
 ## Estado atual
 
-Branch `etapa-3`: backend de geocodificação com Nominatim implementado, além de universidades e CRUD espacial de paradas. `GET /api/geocodificacao?q=...` retorna até cinco resultados com nome e ponto GeoJSON; o backend valida a busca e distingue ausência de resultados, limite, timeout e indisponibilidade.
+Branch `etapa-4`: backend de busca por proximidade implementado. `GET /api/paradas/proximas` combina raio em metros e área visível, retorna `distancia_m` e ordena por distância e ID. Universidades, CRUD espacial, carga de demonstração e geocodificação Nominatim continuam disponíveis.
 
-O cache e o controle de frequência ficam no PostgreSQL e são compartilhados pelas instâncias da aplicação. O frontend continua sob responsabilidade de Millena Kelly, que integra a busca e a atribuição visual. Nenhum arquivo de frontend foi criado nesta etapa.
+O frontend continua sob responsabilidade de Millena Kelly, incluindo controles de raio, círculo, geolocalização e exibição das distâncias. Nenhum arquivo de frontend foi alterado nesta etapa. Ônibus pertencem à etapa 5.
 
-Docker/PostGIS, CRUD e carga dos oito locais já foram validados. Proximidade e ônibus pertencem às etapas 4 e 5. O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo; o build completo com React depende da entrega do frontend.
+O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo; o build completo com React depende da entrega do frontend.
 
 ## Executar com Docker
 
@@ -69,7 +69,7 @@ Com o `.env` configurado e o PostGIS de desenvolvimento disponível, executar:
 npm --prefix apps/backend run test:integration
 ```
 
-A integração aplica migrações e carrega os oito locais de demonstração no banco configurado. Confere migrações concorrentes/repetidas, saúde, CRUD, validações, SRID, índice espacial, bordas e filtros de Cajazeiras/Sousa. Use um banco de desenvolvimento dedicado.
+A integração aplica migrações e carrega os oito locais de demonstração no banco configurado. Confere migrações concorrentes/repetidas, saúde, CRUD, geocodificação simulada, proximidade em metros, validações, índices, bordas e filtros de Cajazeiras/Sousa. Use um banco de desenvolvimento dedicado.
 
 ## Carregar os dados de demonstração
 
@@ -104,6 +104,18 @@ API_PORT=33001 PG_PORT=55433 bash scripts/validate-backend.sh
 Ao terminar, inclusive em caso de falha, remove os containers e o volume exclusivos do teste. Os dados desse teste são descartáveis. O ambiente de desenvolvimento iniciado com os comandos anteriores usa outro projeto e volume.
 
 O workflow `.github/workflows/backend.yml` executa instalação pelo lockfile, os testes locais e essa validação em pushes e pull requests. A inclusão do workflow não comprova uma execução remota: conferir o resultado no GitHub após publicar a branch.
+
+## Buscar paradas próximas
+
+```bash
+curl 'http://localhost:3000/api/paradas/proximas?lat=-6.889266108880796&lng=-38.54534133432616&raio_m=2000&bbox=-38.58,-6.91,-38.53,-6.86'
+```
+
+Os quatro parâmetros são obrigatórios. Latitude e longitude devem estar nas faixas geográficas válidas; `raio_m` deve ser maior que zero e de até 50000 metros. Valores ausentes, repetidos ou inválidos retornam 400 com o campo correspondente. A origem é enviada pelo frontend a partir da posição autorizada do usuário; o backend não usa uma posição padrão.
+
+A consulta combina o raio e o `bbox`: só aparecem paradas que atendem aos dois filtros, incluindo suas bordas. O PostGIS usa `geography`, `ST_DWithin` e um índice GiST específico para proximidade; `ST_Distance` calcula `distancia_m` em metros. Os resultados mantêm os campos da parada e são ordenados por distância crescente e depois por ID. Sem resultados, retorna `[]`. A rota de listagem comum continua exigindo apenas `bbox`.
+
+Com a carga de demonstração e a origem do exemplo, 500 m retornam o ponto 1; 2 km retornam os pontos 1, 5 e 3 nessa ordem; 5 km na área ampliada retornam os cinco locais de Cajazeiras. Essas coordenadas são uma origem simulada apenas para demonstração.
 
 ## Buscar localidades com Nominatim
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { bboxInput, paradaInput, universidadeInput, uuid } from '../validation.js';
+import { bboxInput, paradaInput, proximityInput, universidadeInput, uuid } from '../validation.js';
 const valid = { nome: ' Parada ', universidade_id: '10000000-0000-4000-8000-000000000001', localizacao: { type: 'Point', coordinates: [-38.55, -6.88] } };
 function rejects(fn, field) {
   assert.throws(fn, error => error.status === 400 && error.code === 'VALIDATION_ERROR' && Boolean(error.fields[field]));
@@ -29,4 +29,20 @@ test('rejeita geometria inválida e preserva a ordem longitude/latitude', () => 
 test('bbox é obrigatório e estrito, com intervalos geográficos ordenados', () => {
   for (const bbox of [undefined, '', [], '0,0,1', '0,,1,1', '0,0,1m,1', '0,0,0,1', '1,0,-1,1', '-181,0,1,1', '0,-91,1,1', '0,0,181,1', '0,0,1,91', '0,0,Infinity,1', '0,0,0x10,1']) rejects(() => bboxInput(bbox), 'bbox');
   assert.deepEqual(bboxInput('-38.58,-6.91,-38.53,-6.86'), [-38.58, -6.91, -38.53, -6.86]);
+});
+
+test('proximidade valida números estritos, limites e parâmetros obrigatórios', () => {
+  const valid = { lat: '-6.889', lng: '-38.545', raio_m: '2000', bbox: '-38.58,-6.91,-38.53,-6.86' };
+  assert.deepEqual(proximityInput(valid), { lat: -6.889, lng: -38.545, raio_m: 2000, bbox: [-38.58, -6.91, -38.53, -6.86] });
+  for (const field of ['lat', 'lng', 'raio_m']) {
+    for (const value of [undefined, '', ' ', [], ['1', '2'], '1m', 'Infinity', 'NaN', '0x10', '1; SELECT 1']) {
+      rejects(() => proximityInput({ ...valid, [field]: value }), field);
+    }
+  }
+  for (const [field, values] of [['lat', ['-90.1', '90.1']], ['lng', ['-180.1', '180.1']], ['raio_m', ['0', '-1', '50000.1', '1e999']]]) {
+    for (const value of values) rejects(() => proximityInput({ ...valid, [field]: value }), field);
+  }
+  rejects(() => proximityInput({ ...valid, bbox: undefined }), 'bbox');
+  assert.equal(proximityInput({ ...valid, raio_m: '5e4', lat: '90', lng: '-180' }).raio_m, 50000);
+  assert.equal(proximityInput({ ...valid, raio_m: '0.5', lat: '-90', lng: '180' }).raio_m, 0.5);
 });
