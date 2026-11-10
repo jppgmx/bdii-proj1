@@ -18,7 +18,7 @@ Backlog definido na etapa 0 para o repositório `jppgmx/bdii-proj1`. Cada seçã
 | T12 | [#12](https://github.com/jppgmx/bdii-proj1/issues/12) | 7 — Demonstração e entrega |
 | T13 | [#13](https://github.com/jppgmx/bdii-proj1/issues/13) | 0 — Conferência do enunciado |
 
-As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementação local na branch `etapa-0`, aguardando validação com PostGIS real e Docker. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
+As tarefas de domínio e frontend ainda estão pendentes; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, aguardando execução com PostGIS real e Docker. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
 
 ## T01 — [Etapa 1][Backend] Preparar Express, PostGIS e Docker
 
@@ -33,7 +33,8 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 - [x] Preparar Dockerfile com build React, dependências de produção e arquivos servidos pelo Express.
 - [x] Criar Compose com `app`, `db`, volume e healthcheck, além de `.dockerignore`.
 - [x] Documentar execução/migrações e validar testes HTTP, configuração e falha de inicialização.
-- [ ] Executar build e integração com PostGIS real em um ambiente com acesso ao Docker; nesta sessão, o socket retornou permissão negada.
+- [x] Preparar rotina isolada de build/integração (`scripts/validate-stage-1.sh`) e workflow de CI.
+- [ ] Executar build e integração com PostGIS real em um ambiente com acesso ao Docker; o socket ainda retorna permissão negada.
 
 **Aceite:** backend conecta ao PostGIS local e responde à saúde. Configuração Docker está preparada; não declarar build completo validado sem a entrega React.
 

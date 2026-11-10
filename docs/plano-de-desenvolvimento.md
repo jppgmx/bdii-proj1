@@ -176,7 +176,7 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **Concluída quando:** backend conecta ao PostGIS e o contrato do build está documentado. A imagem completa será validada na etapa 6.
 
-**Verificação parcial:** testes HTTP, configuração e falha de inicialização executados com Node.js 26; configuração Compose válida. Não houve acesso ao socket Docker nesta sessão, inclusive fora do sandbox. Permanecem pendentes o build das imagens e o teste de integração com PostGIS real, disponível em `npm --prefix apps/backend run test:integration`. A etapa 1 ainda não está concluída.
+**Verificação na branch `etapa-1`:** os 15 testes HTTP, configuração e falha de inicialização passaram com Node.js 26; configuração Compose e sintaxe da rotina de validação válidas. Acrescentados `scripts/validate-stage-1.sh` e workflow de CI para compilar o backend, testar PostGIS real, migrações concorrentes/repetíveis, saúde e preservação do histórico ao recriar containers. O acesso ao socket Docker ainda retorna permissão negada; a validação real permanece pendente até a execução bem-sucedida da rotina. A inclusão do workflow não equivale a uma execução remota aprovada. A parte React continua com a colega e a etapa 1 completa ainda não está concluída.
 
 ### Etapa 2 — Adaptar o CRUD de POIs para paradas
 

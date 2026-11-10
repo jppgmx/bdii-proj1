@@ -6,11 +6,11 @@ O React será configurado pela integrante responsável pelo frontend. O Dockerfi
 
 ## Estado atual
 
-Branch `etapa-0`: contratos, dados e tarefas preparados, com a base do backend implementada conforme a solicitação de iniciar o código nesta branch. A infraestrutura prevista na etapa 1 já está escrita: Express, conexão Sequelize/PostGIS, migrações, saúde, erros JSON, Dockerfile e Compose. CRUD e consultas de paradas começam na etapa 2.
+Branch `etapa-1`: base Express/Sequelize, migrações, saúde, erros JSON e infraestrutura Docker implementados. Os contratos, os dados e a base do backend vieram da etapa 0. A etapa 1 acrescenta uma rotina isolada de validação Docker/PostGIS e sua execução automática no GitHub Actions. CRUD e consultas de paradas começam na etapa 2.
 
 Cada próxima etapa terá sua própria branch `etapa-N`, mantendo a implementação gradual e os critérios de aceite do plano. O React continua sob responsabilidade da colega. `aplicacao-poi/` permanece como referência temporária, independente da execução do backend novo.
 
-O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. Nesta sessão, testes HTTP/configuração/inicialização passaram e o Compose foi validado, mas não foi possível executar containers por falta de acesso ao socket do Docker. A integração com PostGIS real e o build das imagens permanecem pendentes; o build com React também depende da entrega do frontend.
+O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. Os 15 testes HTTP/configuração/inicialização passaram e o Compose foi validado. A execução real de Docker/PostGIS ainda aguarda acesso ao Docker; o build com React também depende da entrega do frontend.
 
 ## Executar com Docker
 
@@ -68,6 +68,26 @@ npm --prefix apps/backend run test:integration
 ```
 
 Esse teste aplica migrações no banco configurado, confere execuções concorrentes e repetidas e testa a saúde com PostGIS real. Use um banco de desenvolvimento dedicado.
+
+## Validar a etapa 1 em ambiente isolado
+
+Com Docker e Compose disponíveis, executar na raiz:
+
+```bash
+bash scripts/validate-stage-1.sh
+```
+
+A rotina compila o alvo `backend`, inicia PostGIS, aguarda a saúde, executa o teste de integração real e recria os containers para conferir a preservação do histórico de migrações. Também verifica saúde, 404 JSON da API e execução sem React dentro da imagem. Utiliza um projeto Compose exclusivo e as credenciais locais de `.env.example`; não precisa criar `.env`.
+
+As portas padrão desse teste são 33000 (API) e 55432 (PostgreSQL). Se estiverem ocupadas:
+
+```bash
+API_PORT=33001 PG_PORT=55433 bash scripts/validate-stage-1.sh
+```
+
+Ao terminar, inclusive em caso de falha, remove os containers e o volume exclusivos do teste. Os dados desse teste são descartáveis. O ambiente de desenvolvimento iniciado com os comandos anteriores usa outro projeto e volume.
+
+O workflow `.github/workflows/backend.yml` executa instalação pelo lockfile, os testes locais e essa validação em pushes e pull requests. A inclusão do workflow não comprova uma execução remota: conferir o resultado no GitHub após publicar a branch.
 
 ## Integrar o React
 
