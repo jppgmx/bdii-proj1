@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { bboxInput, paradaInput, proximityInput, universidadeInput, uuid } from '../validation.js';
+import { bboxInput, busPositionInput, onibusInput, paradaInput, proximityInput, universidadeInput, uuid } from '../validation.js';
 const valid = { nome: ' Parada ', universidade_id: '10000000-0000-4000-8000-000000000001', localizacao: { type: 'Point', coordinates: [-38.55, -6.88] } };
 function rejects(fn, field) {
   assert.throws(fn, error => error.status === 400 && error.code === 'VALIDATION_ERROR' && Boolean(error.fields[field]));
@@ -45,4 +45,22 @@ test('proximidade valida números estritos, limites e parâmetros obrigatórios'
   rejects(() => proximityInput({ ...valid, bbox: undefined }), 'bbox');
   assert.equal(proximityInput({ ...valid, raio_m: '5e4', lat: '90', lng: '-180' }).raio_m, 50000);
   assert.equal(proximityInput({ ...valid, raio_m: '0.5', lat: '-90', lng: '180' }).raio_m, 0.5);
+});
+
+test('ônibus começa sem posição e aceita somente o ponto na atualização manual', () => {
+  const universidade_id = '10000000-0000-4000-8000-000000000001';
+  assert.deepEqual(onibusInput({ identificacao: ' DEMO-01 ', universidade_id }), { identificacao: 'DEMO-01', universidade_id });
+  for (const identificacao of [undefined, '', ' ', 123, 'x'.repeat(61)]) rejects(() => onibusInput({ identificacao, universidade_id }), 'identificacao');
+  rejects(() => onibusInput({ identificacao: 'DEMO', universidade_id: 'invalido' }), 'universidade_id');
+  for (const field of ['id', 'posicao_atual', 'posicao_atualizada_em', 'createdAt', 'updatedAt']) {
+    rejects(() => onibusInput({ identificacao: 'DEMO', universidade_id, [field]: null }), field);
+  }
+  const point = { type: 'Point', coordinates: [-38.55, -6.88] };
+  assert.deepEqual(busPositionInput({ posicao_atual: point }), point);
+  for (const posicao_atual of [undefined, null, {}, { type: 'Point', coordinates: [181, 0] }, { type: 'Point', coordinates: ['0', 0] }]) {
+    rejects(() => busPositionInput({ posicao_atual }), 'posicao_atual');
+  }
+  for (const field of ['posicao_atualizada_em', 'universidade_id', 'identificacao', 'updatedAt']) {
+    rejects(() => busPositionInput({ posicao_atual: point, [field]: 'indevido' }), field);
+  }
 });

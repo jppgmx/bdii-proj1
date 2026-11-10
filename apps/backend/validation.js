@@ -40,19 +40,12 @@ export function universidadeInput(body) {
 
 export function paradaInput(body) {
   bodyFields(body, ['nome', 'descricao', 'universidade_id', 'localizacao']);
-  const point = body.localizacao;
-  if (!point || typeof point !== 'object' || Array.isArray(point) ||
-      Object.keys(point).some(key => !['type', 'coordinates'].includes(key)) ||
-      point.type !== 'Point' || !Array.isArray(point.coordinates) || point.coordinates.length !== 2 ||
-      !point.coordinates.every(Number.isFinite) ||
-      Math.abs(point.coordinates[0]) > 180 || Math.abs(point.coordinates[1]) > 90) {
-    invalid('localizacao', 'Informe Point com coordenadas numéricas [longitude, latitude] válidas.');
-  }
+  const localizacao = pointInput(body.localizacao, 'localizacao');
   return {
     nome: text(body.nome, 'nome', 120),
     descricao: text(body.descricao, 'descricao', 500, true, true),
     universidade_id: uuid(body.universidade_id, 'universidade_id'),
-    localizacao: { type: 'Point', coordinates: [...point.coordinates] },
+    localizacao,
   };
 }
 
@@ -86,4 +79,28 @@ export function proximityInput(query) {
     raio_m: number('raio_m', 0, 50000),
     bbox: bboxInput(query.bbox),
   };
+}
+
+export function pointInput(point, field) {
+  if (!point || typeof point !== 'object' || Array.isArray(point) ||
+      Object.keys(point).some(key => !['type', 'coordinates'].includes(key)) ||
+      point.type !== 'Point' || !Array.isArray(point.coordinates) || point.coordinates.length !== 2 ||
+      !point.coordinates.every(Number.isFinite) ||
+      Math.abs(point.coordinates[0]) > 180 || Math.abs(point.coordinates[1]) > 90) {
+    invalid(field, 'Informe Point com coordenadas numéricas [longitude, latitude] válidas.');
+  }
+  return { type: 'Point', coordinates: [...point.coordinates] };
+}
+
+export function onibusInput(body) {
+  bodyFields(body, ['identificacao', 'universidade_id']);
+  return {
+    identificacao: text(body.identificacao, 'identificacao', 60),
+    universidade_id: uuid(body.universidade_id, 'universidade_id'),
+  };
+}
+
+export function busPositionInput(body) {
+  bodyFields(body, ['posicao_atual']);
+  return pointInput(body.posicao_atual, 'posicao_atual');
 }

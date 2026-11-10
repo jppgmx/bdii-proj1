@@ -1,3 +1,4 @@
+import { createOnibusRouter } from './routes/onibusRouter.js';
 import { createGeocoder } from './services/geocoding.js';
 import { createGeocodingRouter } from './routes/geocodingRouter.js';
 import express from 'express';
@@ -17,6 +18,7 @@ export function createApp({ database, publicDir = defaultPublicDir, logger = con
   const api = express.Router();
   api.use('/health', createHealthRouter(database));
   api.use('/geocodificacao', createGeocodingRouter(geocoder));
+  api.use('/onibus', createOnibusRouter(database));
   api.use(createDomainRouter(database));
   api.use(notFound);
   app.use('/api', api);
