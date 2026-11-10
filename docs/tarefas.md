@@ -1,28 +1,28 @@
 # Tarefas da dupla
 
-Backlog definido na etapa 0 para o repositório `jppgmx/bdii-proj1`. Cada seção corresponde a uma issue, com responsável por função, dependências e critério de aceite. Os responsáveis estão descritos por função; nenhuma conta foi atribuída à colega, pois seu usuário ainda não foi informado.
+Backlog definido na etapa 0 para o repositório `jppgmx/bdii-proj1`. Cada seção corresponde a uma issue, com responsável por função, dependências e critério de aceite. João Paulo é responsável pelo backend e pela infraestrutura; Millena Kelly, pelo frontend. A conta GitHub de Millena Kelly ainda não foi informada para atribuição nas issues.
 
 | Tarefa | Issue | Etapa / responsável |
 | --- | --- | --- |
-| T01 | [#1](https://github.com/jppgmx/bdii-proj1/issues/1) | 1 — Backend e infraestrutura |
-| T02 | [#2](https://github.com/jppgmx/bdii-proj1/issues/2) | 1 — Frontend |
-| T03 | [#3](https://github.com/jppgmx/bdii-proj1/issues/3) | 2 — Backend |
-| T04 | [#4](https://github.com/jppgmx/bdii-proj1/issues/4) | 2 — Frontend |
-| T05 | [#5](https://github.com/jppgmx/bdii-proj1/issues/5) | 3 — Backend |
-| T06 | [#6](https://github.com/jppgmx/bdii-proj1/issues/6) | 3 — Frontend |
-| T07 | [#7](https://github.com/jppgmx/bdii-proj1/issues/7) | 4 — Backend |
-| T08 | [#8](https://github.com/jppgmx/bdii-proj1/issues/8) | 4 — Frontend |
-| T09 | [#9](https://github.com/jppgmx/bdii-proj1/issues/9) | 5 — Backend |
-| T10 | [#10](https://github.com/jppgmx/bdii-proj1/issues/10) | 5 — Frontend |
+| T01 | [#1](https://github.com/jppgmx/bdii-proj1/issues/1) | 1 — João Paulo / Backend e infraestrutura |
+| T02 | [#2](https://github.com/jppgmx/bdii-proj1/issues/2) | 1 — Millena Kelly / Frontend |
+| T03 | [#3](https://github.com/jppgmx/bdii-proj1/issues/3) | 2 — João Paulo / Backend |
+| T04 | [#4](https://github.com/jppgmx/bdii-proj1/issues/4) | 2 — Millena Kelly / Frontend |
+| T05 | [#5](https://github.com/jppgmx/bdii-proj1/issues/5) | 3 — João Paulo / Backend |
+| T06 | [#6](https://github.com/jppgmx/bdii-proj1/issues/6) | 3 — Millena Kelly / Frontend |
+| T07 | [#7](https://github.com/jppgmx/bdii-proj1/issues/7) | 4 — João Paulo / Backend |
+| T08 | [#8](https://github.com/jppgmx/bdii-proj1/issues/8) | 4 — Millena Kelly / Frontend |
+| T09 | [#9](https://github.com/jppgmx/bdii-proj1/issues/9) | 5 — João Paulo / Backend |
+| T10 | [#10](https://github.com/jppgmx/bdii-proj1/issues/10) | 5 — Millena Kelly / Frontend |
 | T11 | [#11](https://github.com/jppgmx/bdii-proj1/issues/11) | 6 — Integração e publicação |
 | T12 | [#12](https://github.com/jppgmx/bdii-proj1/issues/12) | 7 — Demonstração e entrega |
 | T13 | [#13](https://github.com/jppgmx/bdii-proj1/issues/13) | 0 — Conferência do enunciado |
 
-As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementação local na branch `etapa-0`, aguardando validação com PostGIS real e Docker. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
+As tarefas de domínio e frontend ainda estão pendentes; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
 
 ## T01 — [Etapa 1][Backend] Preparar Express, PostGIS e Docker
 
-**Responsável:** backend e infraestrutura — você.
+**Responsável:** backend e infraestrutura — João Paulo.
 
 **Dependências:** contratos definidos na etapa 0. O build final depende de T02.
 
@@ -33,13 +33,14 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 - [x] Preparar Dockerfile com build React, dependências de produção e arquivos servidos pelo Express.
 - [x] Criar Compose com `app`, `db`, volume e healthcheck, além de `.dockerignore`.
 - [x] Documentar execução/migrações e validar testes HTTP, configuração e falha de inicialização.
-- [ ] Executar build e integração com PostGIS real em um ambiente com acesso ao Docker; nesta sessão, o socket retornou permissão negada.
+- [x] Preparar rotina isolada de build/integração (`scripts/validate-stage-1.sh`) e workflow de CI.
+- [x] Executar build e integração com PostGIS real: rotina completa aprovada, incluindo saúde e preservação das migrações ao recriar containers.
 
 **Aceite:** backend conecta ao PostGIS local e responde à saúde. Configuração Docker está preparada; não declarar build completo validado sem a entrega React.
 
 ## T02 — [Etapa 1][Frontend] Configurar React e integração de desenvolvimento
 
-**Responsável:** frontend — colega.
+**Responsável:** frontend — Millena Kelly.
 
 **Dependências:** `docs/integracao.md`; verificação real de saúde depende de T01.
 
@@ -49,11 +50,11 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 - [ ] Criar estrutura visual simples com mapa, painel e formulários.
 - [ ] Verificar `/api/health` e apresentar falha de conexão de forma compreensível.
 
-**Aceite:** `npm ci` e build produzem `dist/index.html` e assets; chamadas à API passam pelo proxy. A configuração React permanece com a colega.
+**Aceite:** `npm ci` e build produzem `dist/index.html` e assets; chamadas à API passam pelo proxy. A configuração React permanece com Millena Kelly.
 
 ## T03 — [Etapa 2][Backend] Implementar universidades e CRUD espacial de paradas
 
-**Responsável:** backend — você.
+**Responsável:** backend — João Paulo.
 
 **Dependências:** T01.
 
@@ -68,7 +69,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T04 — [Etapa 2][Frontend] Integrar Leaflet, geolocalização e CRUD de paradas
 
-**Responsável:** frontend — colega.
+**Responsável:** frontend — Millena Kelly.
 
 **Dependências:** T02; integração real depende de T03. Pode começar com mocks do contrato.
 
@@ -83,7 +84,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T05 — [Etapa 3][Backend] Integrar geocodificação com tratamento de falhas
 
-**Responsável:** backend — você.
+**Responsável:** backend — João Paulo.
 
 **Dependências:** T03.
 
@@ -96,7 +97,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T06 — [Etapa 3][Frontend] Adicionar busca e seleção de localidades
 
-**Responsável:** frontend — colega.
+**Responsável:** frontend — Millena Kelly.
 
 **Dependências:** T04; integração real depende de T05.
 
@@ -109,7 +110,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T07 — [Etapa 4][Backend] Consultar paradas por distância em metros
 
-**Responsável:** backend — você.
+**Responsável:** backend — João Paulo.
 
 **Dependências:** T03; executar após a etapa 3.
 
@@ -123,7 +124,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T08 — [Etapa 4][Frontend] Integrar raio de busca e distâncias
 
-**Responsável:** frontend — colega.
+**Responsável:** frontend — Millena Kelly.
 
 **Dependências:** T04; integração real depende de T07. Executar após a etapa 3.
 
@@ -136,7 +137,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T09 — [Etapa 5][Backend] Persistir ônibus e atualização manual de posição
 
-**Responsável:** backend — você.
+**Responsável:** backend — João Paulo.
 
 **Dependências:** T03; executar após a etapa 4.
 
@@ -150,7 +151,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T10 — [Etapa 5][Frontend] Exibir ônibus e editar posição manualmente
 
-**Responsável:** frontend — colega.
+**Responsável:** frontend — Millena Kelly.
 
 **Dependências:** T04; integração real depende de T09. Executar após a etapa 4.
 
@@ -164,7 +165,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T11 — [Etapa 6][Integração] Validar Docker e publicar React com Express
 
-**Responsável:** dupla; backend cuida de infraestrutura e publicação, frontend valida o build e a interface.
+**Responsáveis:** João Paulo e Millena Kelly; backend cuida de infraestrutura e publicação, frontend valida o build e a interface.
 
 **Dependências:** T01 a T10; condições externas de publicação devem ser confirmadas em T13.
 
@@ -180,7 +181,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T12 — [Etapa 7][Integração] Preparar demonstração e entrega da disciplina
 
-**Responsável:** dupla.
+**Responsáveis:** João Paulo e Millena Kelly.
 
 **Dependências:** T11 e confirmação de prazo/formato em T13.
 
@@ -193,7 +194,7 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem implementaçã
 
 ## T13 — [Etapa 0][Integração] Conferir enunciado e requisitos externos
 
-**Responsável:** dupla.
+**Responsáveis:** João Paulo e Millena Kelly.
 
 **Dependências:** acesso ao enunciado oficial ou confirmação do professor. O arquivo citado no plano anterior não está no repositório.
 

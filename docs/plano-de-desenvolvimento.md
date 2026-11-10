@@ -40,11 +40,11 @@ Ficam fora desta versão: login, rastreamento GPS de ônibus, WebSocket, histór
 
 | Responsável | Responsabilidade |
 | --- | --- |
-| Você — backend e infraestrutura | Express, Sequelize, PostGIS, validações, consultas espaciais, Dockerfile, Compose e publicação do servidor que também hospeda o React. |
-| Sua colega — frontend | Configurar o projeto React, adicionar Leaflet, criar interface e formulários, integrar a API e garantir o comando de build. |
-| Dupla | Combinar o contrato da API e do build, integrar, revisar os requisitos e preparar a demonstração. |
+| João Paulo — backend e infraestrutura | Express, Sequelize, PostGIS, validações, consultas espaciais, Dockerfile, Compose e publicação do servidor que também hospeda o React. |
+| Millena Kelly — frontend | Configurar o projeto React, adicionar Leaflet, criar interface e formulários, integrar a API e garantir o comando de build. |
+| João Paulo e Millena Kelly | Combinar o contrato da API e do build, integrar, revisar os requisitos e preparar a demonstração. |
 
-A configuração do React pertence à sua colega. Sua tarefa é deixar o Dockerfile preparado para instalar as dependências e compilar o frontend quando ela entregar o projeto, sem depender do `public/` antigo.
+A configuração do React pertence a Millena Kelly. A tarefa de João Paulo é deixar o Dockerfile preparado para instalar as dependências e compilar o frontend quando ela entregar o projeto, sem depender do `public/` antigo.
 
 ## 3. Estrutura e execução definidas
 
@@ -58,7 +58,7 @@ apps/
     index.js
     package.json
     package-lock.json
-  frontend/                 # projeto React configurado pela colega
+  frontend/                 # projeto React configurado por Millena Kelly
     package.json
     package-lock.json
     ...
@@ -85,7 +85,7 @@ Manter a organização próxima da referência, com modelos e rotas, sem introdu
 ### Contrato entre React, Docker e Express
 
 - Contexto de build do Docker na raiz, com acesso a `apps/backend` e `apps/frontend`.
-- Sua colega entrega `npm run build`, lockfile e diretório de saída documentado. Usar `dist/` como convenção inicial; se a configuração escolhida gerar outro caminho, ajustar o estágio de cópia.
+- Millena Kelly entrega `npm run build`, lockfile e diretório de saída documentado. Usar `dist/` como convenção inicial; se a configuração escolhida gerar outro caminho, ajustar o estágio de cópia.
 - Dockerfile com múltiplos estágios: instalar e compilar o frontend; instalar apenas as dependências de produção do backend; copiar o build React para `apps/backend/public/` na imagem final.
 - A imagem final executa o Express. O React compilado é composto por arquivos estáticos; não precisa de outro servidor em produção.
 - O navegador chama `/api/...` na mesma origem. No desenvolvimento, o servidor do React deve encaminhar essas chamadas ao Express por proxy.
@@ -142,7 +142,7 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 ### Etapa 0 — Registrar os contratos da dupla
 
-**Dupla**
+**João Paulo e Millena Kelly**
 
 - [x] Criar [contrato da API](contrato-api.md) a partir das rotas acima, com exemplos, validações e códigos de resposta.
 - [x] Definir os [dados de demonstração](dados-demonstracao.md) com os oito locais de Cajazeiras e Sousa fornecidos pelo usuário.
@@ -152,11 +152,11 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **Concluída quando:** cada pessoa conhece sua entrega e consegue trabalhar com os mesmos formatos de dados.
 
-**Situação:** entregas locais da etapa 0 preparadas e 13 issues registradas no GitHub. Conforme a orientação de implementar por branches, a branch `etapa-0` também inclui a base do backend e os arquivos de infraestrutura previstos na etapa 1. As próximas etapas usarão branches `etapa-N`. A conferência do enunciado permanece pendente na [issue #13](https://github.com/jppgmx/bdii-proj1/issues/13), pois o documento oficial não está no repositório. A configuração do React permanece com a colega.
+**Situação:** entregas locais da etapa 0 preparadas e 13 issues registradas no GitHub. Conforme a orientação de implementar por branches, a branch `etapa-0` também inclui a base do backend e os arquivos de infraestrutura previstos na etapa 1. As próximas etapas usarão branches `etapa-N`. A conferência do enunciado permanece pendente na [issue #13](https://github.com/jppgmx/bdii-proj1/issues/13), pois o documento oficial não está no repositório. A configuração do React permanece com Millena Kelly.
 
 ### Etapa 1 — Extrair o backend e preparar Docker/PostGIS
 
-**Você**
+**João Paulo**
 
 - [x] Criar o projeto em `apps/backend`, adaptando a inicialização do Express, a conexão Sequelize e o padrão de rotas da referência.
 - [x] Configurar variáveis de porta e conexão, incluindo porta do PostgreSQL, com `.env.example` sem credenciais reais.
@@ -166,9 +166,9 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 - [x] Preparar Dockerfile com build React e Express servindo `public/`, conforme o contrato da seção 3; alvo `backend` disponível antes da entrega do React e alvo `production` para o pacote completo.
 - [x] Criar `compose.yaml` com aplicação, PostGIS, volume persistente e espera pela saúde do banco; definir como executar as migrações.
 - [x] Criar `.dockerignore`, excluindo dependências locais, arquivos `.env`, `.git` e `aplicacao-poi/` do contexto enviado ao build.
-- [ ] Validar o serviço PostGIS e o backend; registrar que a validação da imagem completa depende da entrega do React.
+- [x] Validar o serviço PostGIS e o backend; a validação da imagem completa depende da entrega do React.
 
-**Sua colega**
+**Millena Kelly**
 
 - [ ] Configurar React em `apps/frontend`, com lockfile, scripts de desenvolvimento e build.
 - [ ] Preparar layout simples com mapa, painel e formulários.
@@ -176,11 +176,11 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **Concluída quando:** backend conecta ao PostGIS e o contrato do build está documentado. A imagem completa será validada na etapa 6.
 
-**Verificação parcial:** testes HTTP, configuração e falha de inicialização executados com Node.js 26; configuração Compose válida. Não houve acesso ao socket Docker nesta sessão, inclusive fora do sandbox. Permanecem pendentes o build das imagens e o teste de integração com PostGIS real, disponível em `npm --prefix apps/backend run test:integration`. A etapa 1 ainda não está concluída.
+**Verificação na branch `etapa-1`:** os 15 testes HTTP, configuração e falha de inicialização passaram com Node.js 26. A rotina `scripts/validate-stage-1.sh` passou com Docker/PostGIS real: build do alvo backend, integração com migrações concorrentes/repetíveis, saúde, erros JSON e preservação do histórico de migrações ao recriar ambos os containers. Corrigido o healthcheck do banco para usar TCP: a verificação por socket Unix marcava o servidor temporário do initdb como pronto antes de aceitar conexões do backend. Os containers e o volume exclusivos do teste foram removidos ao final. T01 (backend/infraestrutura) concluída; T02 (React, layout e proxy) permanece com Millena Kelly. O workflow de CI está preparado, mas sua execução remota ainda não foi verificada. O build completo com React será validado após sua entrega, na etapa 6.
 
 ### Etapa 2 — Adaptar o CRUD de POIs para paradas
 
-**Você**
+**João Paulo**
 
 - [ ] Criar migrações e modelos de universidade e parada, adaptando os campos do POI e explicitando SRID 4326.
 - [ ] Implementar cadastro e listagem simples de universidades.
@@ -188,7 +188,7 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 - [ ] Implementar desde a listagem inicial o filtro obrigatório por `bbox`, com consulta PostGIS e índice espacial.
 - [ ] Verificar persistência e inclusão/exclusão de pontos dentro e fora do retângulo consultado.
 
-**Sua colega**
+**Millena Kelly**
 
 - [ ] Adicionar Leaflet e a camada OpenStreetMap com atribuição visível.
 - [ ] Iniciar o mapa em Cajazeiras-PB, usando o centro aproximado da referência `[-6.8863, -38.5559]` e zoom 14.
@@ -203,13 +203,13 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 ### Etapa 3 — Adaptar a busca de localidades
 
-**Você**
+**João Paulo**
 
 - [ ] Implementar `/api/geocodificacao` com provedor configurável e resposta simples de nome e coordenadas.
 - [ ] Tratar busca vazia, ausência de resultados, timeout e falhas do provedor.
 - [ ] Se usar o Nominatim público, conferir e atender à política vigente de identificação, atribuição, frequência e cache antes da publicação.
 
-**Sua colega**
+**Millena Kelly**
 
 - [ ] Adaptar o botão de busca da referência para o formulário React, com ação por botão ou Enter.
 - [ ] Exibir os resultados e permitir escolher um, centralizando o mapa e movendo o marcador de cadastro.
@@ -219,13 +219,13 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 ### Etapa 4 — Acrescentar busca por proximidade
 
-**Você**
+**João Paulo**
 
 - [ ] Implementar consulta parametrizada com posição do usuário, raio em metros e `bbox`.
 - [ ] Validar raio positivo e limite máximo no contrato; filtrar com `ST_DWithin`, calcular distância e ordenar os resultados.
 - [ ] Criar índice para a consulta em `geography` e verificar pontos dentro, fora e na borda do raio com dados controlados.
 
-**Sua colega**
+**Millena Kelly**
 
 - [ ] Criar seleção simples de raio, por exemplo, 500 m, 1 km e 2 km.
 - [ ] Usar a posição autorizada do usuário como origem, desenhar o círculo e enquadrar a área pesquisada.
@@ -237,13 +237,13 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 ### Etapa 5 — Completar a temática com ônibus de posição manual
 
-**Você**
+**João Paulo**
 
 - [ ] Criar migração e modelo de ônibus com universidade, ponto opcional e horário da posição.
 - [ ] Implementar cadastro, listagem para seleção e listagem de posições por `bbox` com índice espacial.
 - [ ] Implementar atualização de posição, salvando ponto e horário do servidor juntos e retornando o estado persistido.
 
-**Sua colega**
+**Millena Kelly**
 
 - [ ] Criar cadastro simples e seleção de ônibus, indicando os que estão sem posição.
 - [ ] Exibir ônibus com marcador diferente das paradas e da posição do usuário.
@@ -255,22 +255,22 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 ### Etapa 6 — Validar o pacote Docker e publicar
 
-**Você**
+**João Paulo**
 
-- [ ] Integrar o projeto React entregue pela colega ao Dockerfile e verificar `npm ci`, build e cópia dos arquivos para o Express.
+- [ ] Integrar o projeto React entregue por Millena Kelly ao Dockerfile e verificar `npm ci`, build e cópia dos arquivos para o Express.
 - [ ] Executar `docker compose up --build` e validar o acesso ao frontend e à API pela mesma porta do Express.
 - [ ] Verificar que as migrações podem ser repetidas com segurança e que os dados persistem após recriar os containers, preservando o volume.
 - [ ] Preparar o banco PostGIS na nuvem e executar as migrações, conforme os requisitos de entrega confirmados.
 - [ ] Publicar a imagem da aplicação, configurar conexão externa e HTTPS e conferir frontend e API no mesmo endereço.
 - [ ] Garantir que erros de API e conexão não exponham credenciais ou detalhes internos.
 
-**Sua colega**
+**Millena Kelly**
 
 - [ ] Verificar o React compilado servido pelo Express, incluindo carregamento de assets e chamadas relativas a `/api`.
 - [ ] Revisar o layout em celular e computador, os controles do mapa e os estados de erro.
 - [ ] Verificar geolocalização no endereço HTTPS publicado.
 
-**Dupla**
+**João Paulo e Millena Kelly**
 
 - [ ] Testar CRUD, geocodificação, filtros espaciais e posição manual no endereço público.
 - [ ] Documentar instalação, variáveis, migrações, build, execução local e publicação no README.
@@ -280,7 +280,7 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 ### Etapa 7 — Conferir requisitos e preparar a apresentação
 
-**Dupla**
+**João Paulo e Millena Kelly**
 
 - [ ] Preparar duas universidades/campi, paradas de demonstração em Cajazeiras e um ônibus com posição manual.
 - [ ] Usar coordenadas controladas para demonstrar diferenças entre pontos próximos e distantes da origem da busca.
