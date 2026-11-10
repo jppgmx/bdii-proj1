@@ -74,7 +74,7 @@ Nominatim é o candidato inicial à geocodificação. Se for adotado, o frontend
 4. Na imagem final, frontend e API funcionam na porta 3000, sem servidor React separado.
 5. Uma API inexistente retorna JSON 404; geolocalização, carregamento do mapa e persistência são verificados nos ambientes correspondentes.
 
-As verificações acima pertencem às etapas 1 e 6. A base Express/PostGIS, as migrações e os arquivos Docker estão implementados. Os testes HTTP usam banco simulado; a integração real e o build das imagens podem ser verificados com `bash scripts/validate-stage-1.sh`, também configurado no workflow `backend.yml`. A rotina passou localmente na etapa 1, incluindo build do backend, PostGIS real, saúde e preservação das migrações após recriar containers. O healthcheck do banco usa TCP para não aceitar o servidor temporário da inicialização como pronto. O React permanece a cargo de Millena Kelly.
+As verificações acima pertencem às etapas 1 e 6. A base Express/PostGIS, as migrações e os arquivos Docker estão implementados. Os testes HTTP básicos usam banco simulado; a integração real e o build das imagens podem ser verificados com `bash scripts/validate-backend.sh`, também configurado no workflow `backend.yml`. A rotina passou localmente na etapa 1, incluindo build do backend, PostGIS real, saúde e preservação das migrações após recriar containers. O healthcheck do banco usa TCP para não aceitar o servidor temporário da inicialização como pronto. O React permanece a cargo de Millena Kelly.
 
 ## Dependências
 

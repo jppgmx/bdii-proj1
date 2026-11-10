@@ -10,6 +10,7 @@ ENV API_PORT=3000
 WORKDIR /app/apps/backend
 COPY --from=backend-dependencies /app/apps/backend/node_modules ./node_modules
 COPY --chown=node:node apps/backend/ ./
+COPY --chown=node:node docs/dados-demonstracao.json /app/docs/dados-demonstracao.json
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=6s --start-period=20s --retries=3 \

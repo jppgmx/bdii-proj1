@@ -18,7 +18,7 @@ Backlog definido na etapa 0 para o repositório `jppgmx/bdii-proj1`. Cada seçã
 | T12 | [#12](https://github.com/jppgmx/bdii-proj1/issues/12) | 7 — Demonstração e entrega |
 | T13 | [#13](https://github.com/jppgmx/bdii-proj1/issues/13) | 0 — Conferência do enunciado |
 
-As tarefas de domínio e frontend ainda estão pendentes; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
+O frontend permanece pendente; T03 (universidades e CRUD espacial de paradas) está implementada e validada com PostGIS real na `etapa-2`; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
 
 ## T01 — [Etapa 1][Backend] Preparar Express, PostGIS e Docker
 
@@ -58,12 +58,12 @@ As tarefas de domínio e frontend ainda estão pendentes; T01 tem a base impleme
 
 **Dependências:** T01.
 
-- [ ] Criar migrações de universidades e paradas, com UUID, chave estrangeira e `geometry(Point, 4326)`.
-- [ ] Implementar cadastro/listagem de universidades e CRUD de paradas conforme o contrato.
-- [ ] Exigir `bbox` na listagem e filtrar no banco, incluindo bordas, com índice GiST.
-- [ ] Validar campos, coordenadas, UUIDs, vínculos e erros JSON.
-- [ ] Preparar carga de demonstração com as oito instituições/unidades e oito pontos fornecidos, preservando IDs e sem duplicar dados ao repetir a carga.
-- [ ] Verificar persistência, edição da geometria, exclusão e pontos dentro/fora da área.
+- [x] Criar migrações de universidades e paradas, com UUID, chave estrangeira e `geometry(Point, 4326)`.
+- [x] Implementar cadastro/listagem de universidades e CRUD de paradas conforme o contrato.
+- [x] Exigir `bbox` na listagem e filtrar no banco, incluindo bordas, com índice GiST.
+- [x] Validar campos, coordenadas, UUIDs, vínculos e erros JSON.
+- [x] Preparar carga de demonstração com as oito instituições/unidades e oito pontos fornecidos, preservando IDs e sem duplicar dados ao repetir a carga.
+- [x] Verificar persistência, edição da geometria, exclusão e pontos dentro/fora da área.
 
 **Aceite:** CRUD persiste no PostGIS e os cenários de Cajazeiras/Sousa devolvem os pontos esperados, sem listagem completa quando falta `bbox`.
 

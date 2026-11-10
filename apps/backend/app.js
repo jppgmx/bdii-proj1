@@ -1,4 +1,5 @@
 import express from 'express';
+import { createDomainRouter } from './routes/domainRouter.js';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { errorHandler, notFound } from './errors.js';
@@ -13,6 +14,7 @@ export function createApp({ database, publicDir = defaultPublicDir, logger = con
 
   const api = express.Router();
   api.use('/health', createHealthRouter(database));
+  api.use(createDomainRouter(database));
   api.use(notFound);
   app.use('/api', api);
 

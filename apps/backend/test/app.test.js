@@ -53,7 +53,7 @@ test('saúde detecta queda e recuperação do banco sem expor credenciais', asyn
 
 test('API inexistente retorna JSON 404 mesmo com Accept HTML e build disponível', async t => {
   const request = await serve(t);
-  for (const path of ['/api', '/api/inexistente', '/api/paradas']) {
+  for (const path of ['/api', '/api/inexistente', '/api/ausente']) {
     const response = await request(path, { headers: { Accept: 'text/html' } });
     assert.equal(response.status, 404);
     assert.match(response.headers.get('content-type'), /application\/json/);
