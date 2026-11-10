@@ -61,4 +61,20 @@ console.log('Oito paradas preservadas após recriar aplicação e banco.');
 console.log('Saúde, API JSON e execução sem React verificadas na imagem.');
 JS
 
+# Verificação manual opcional; o CI nunca faz chamadas ao serviço público.
+if [[ "${GEOCODING_LIVE_CHECK:-0}" == 1 ]]; then
+  "${compose[@]}" exec -T app node --input-type=module <<'JS'
+import assert from 'node:assert/strict';
+for (const q of ['Cajazeiras, Paraíba, Brasil', 'Sousa, Paraíba, Brasil']) {
+  const response = await fetch(`http://127.0.0.1:3000/api/geocodificacao?${new URLSearchParams({ q })}`);
+  const result = await response.json();
+  assert.equal(response.status, 200, JSON.stringify(result));
+  assert.ok(result.length > 0 && result.length <= 5);
+  assert.ok(result.every(row => row.localizacao.type === 'Point' && row.localizacao.coordinates.every(Number.isFinite)));
+  console.log(`Nominatim real: ${q} — ${result.length} resultado(s).`);
+  await new Promise(resolve => setTimeout(resolve, 1100));
+}
+JS
+fi
+
 echo 'Backend: build, PostGIS, CRUD espacial, migrações e persistência validados.'

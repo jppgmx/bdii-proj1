@@ -48,7 +48,7 @@ No Express, registrar rotas e erros JSON de `/api` antes de servir o frontend. U
 | `PG_SSL` | `false` no banco local; `true` quando exigido pelo provedor. Não desabilitar verificação de certificado. |
 | `APP_BUILD_TARGET` | `backend` enquanto o React não foi entregue; `production` para integrar seu build. |
 
-Não há variável de URL de API obrigatória no React: as chamadas são relativas a `/api`. Configurações de geocodificação serão definidas na etapa 3 conforme o provedor escolhido. Nenhuma variável secreta deve ser incorporada no build do frontend.
+Não há variável de URL de API obrigatória no React: as chamadas são relativas a `/api`. Na etapa 3, `GEOCODING_URL`, `GEOCODING_USER_AGENT`, `GEOCODING_TIMEOUT_MS` e `GEOCODING_CACHE_TTL_SECONDS` configuram o Nominatim no backend, conforme `.env.example`. Nenhuma variável secreta deve ser incorporada no build do frontend.
 
 ## Mapa e interação
 
@@ -64,7 +64,7 @@ Não há variável de URL de API obrigatória no React: as chamadas são relativ
 
 A camada prevista é OpenStreetMap. Manter visível a atribuição com link para os contribuidores: `© OpenStreetMap contributors`. Na etapa de implementação, conferir as condições do serviço de tiles escolhido.
 
-Nominatim é o candidato inicial à geocodificação. Se for adotado, o frontend mantém a atribuição de dados OpenStreetMap e o backend controla as chamadas conforme a política vigente. Se o provedor mudar, atualizar atribuição e configuração antes da integração. A busca será explícita por botão ou Enter.
+Nominatim foi escolhido para a etapa 3. A [política do serviço público](https://operations.osmfoundation.org/policies/nominatim/) foi consultada: identificação da aplicação, atribuição, cache, até uma chamada por segundo para toda a aplicação e busca explícita, sem autocomplete. O backend identifica o projeto por User-Agent, mantém cache/limite no PostgreSQL e permite trocar o endpoint por serviço compatível via `GEOCODING_URL`. O frontend mantém `© OpenStreetMap contributors` com link para a licença. Millena Kelly integra a busca por botão ou Enter e trata 400, 429 (header `Retry-After`), 502 e 504; a API nunca converte falhas em lista vazia. Não houve alteração no frontend nesta etapa.
 
 ## Aceite da integração
 

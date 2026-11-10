@@ -8,11 +8,11 @@ O React será configurado por Millena Kelly, responsável pelo frontend. O Docke
 
 ## Estado atual
 
-Branch `etapa-2`: universidades (cadastro/listagem), CRUD de paradas, validações e filtro obrigatório por área visível implementados. As paradas usam `geometry(Point, 4326)`, chave estrangeira e índice GiST; a filtragem ocorre no PostGIS e inclui as bordas. O frontend continua sob responsabilidade de Millena Kelly e ainda não está presente em `apps/frontend/`.
+Branch `etapa-3`: backend de geocodificação com Nominatim implementado, além de universidades e CRUD espacial de paradas. `GET /api/geocodificacao?q=...` retorna até cinco resultados com nome e ponto GeoJSON; o backend valida a busca e distingue ausência de resultados, limite, timeout e indisponibilidade.
 
-A base Docker/PostGIS da etapa 1 está validada. A etapa 2 mantém os contratos da dupla e acrescenta uma carga opcional com os oito locais fornecidos. Geocodificação, proximidade e ônibus pertencem às próximas etapas. `aplicacao-poi/` permanece como referência temporária, independente da execução.
+O cache e o controle de frequência ficam no PostgreSQL e são compartilhados pelas instâncias da aplicação. O frontend continua sob responsabilidade de Millena Kelly, que integra a busca e a atribuição visual. Nenhum arquivo de frontend foi criado nesta etapa.
 
-O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. A parte frontend da etapa 2 aguarda integração por Millena Kelly; o build completo com React depende dessa entrega.
+Docker/PostGIS, CRUD e carga dos oito locais já foram validados. Proximidade e ônibus pertencem às etapas 4 e 5. O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo; o build completo com React depende da entrega do frontend.
 
 ## Executar com Docker
 
@@ -104,6 +104,33 @@ API_PORT=33001 PG_PORT=55433 bash scripts/validate-backend.sh
 Ao terminar, inclusive em caso de falha, remove os containers e o volume exclusivos do teste. Os dados desse teste são descartáveis. O ambiente de desenvolvimento iniciado com os comandos anteriores usa outro projeto e volume.
 
 O workflow `.github/workflows/backend.yml` executa instalação pelo lockfile, os testes locais e essa validação em pushes e pull requests. A inclusão do workflow não comprova uma execução remota: conferir o resultado no GitHub após publicar a branch.
+
+## Buscar localidades com Nominatim
+
+```bash
+curl 'http://localhost:3000/api/geocodificacao?q=Cajazeiras%2C%20Para%C3%ADba'
+```
+
+`q` exige 3 a 200 caracteres após aparar espaços. A resposta contém até cinco itens `{ nome, localizacao: { type: "Point", coordinates: [longitude, latitude] } }`. Nenhum resultado retorna `[]`; erros usam 400, 429 com `Retry-After`, 502 ou 504 conforme o contrato.
+
+A [política do Nominatim público](https://operations.osmfoundation.org/policies/nominatim/) exige identificação da aplicação, atribuição ao OpenStreetMap e até uma requisição por segundo somando todos os usuários. A busca deve ser explícita por botão ou Enter; não usar autocomplete nem consultas periódicas. O backend envia um User-Agent com o endereço deste repositório, mantém cache persistente por 24 horas (até 1000 buscas, inclusive vazias) e serializa as chamadas por lock no PostgreSQL. Consultas sem cache durante uma chamada ativa ou o intervalo mínimo recebem 429; resultados em cache continuam acessíveis. O intervalo é preservado também após falha do provedor; `Retry-After` do provedor é respeitado até 24 horas (60 segundos se ausente).
+
+Configurações disponíveis em `.env.example`, também encaminhadas pelo Compose:
+
+| Variável | Padrão / finalidade |
+| --- | --- |
+| `GEOCODING_URL` | `https://nominatim.openstreetmap.org/search`; trocar por serviço compatível com Nominatim sem alterar código. |
+| `GEOCODING_USER_AGENT` | Identificação da aplicação e link do repositório; texto ASCII. |
+| `GEOCODING_TIMEOUT_MS` | 5000 ms; limite de 1 a 60000 ms. |
+| `GEOCODING_CACHE_TTL_SECONDS` | 86400 segundos; limite de 1 a 604800 segundos. |
+
+Millena Kelly deve manter visível `© OpenStreetMap contributors`, com link para [atribuição/licença](https://www.openstreetmap.org/copyright). A API inclui esse endereço no header `Link` com relação `license`. O endpoint pesquisa locais públicos e não restringe a busca à área do mapa.
+
+Os testes automáticos simulam o provedor e não acessam o serviço público. Para uma verificação manual de Cajazeiras e Sousa, com duas chamadas espaçadas:
+
+```bash
+GEOCODING_LIVE_CHECK=1 bash scripts/validate-backend.sh
+```
 
 ## Integrar o React
 

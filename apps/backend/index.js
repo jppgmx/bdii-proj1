@@ -1,3 +1,4 @@
+import { createGeocoder } from './services/geocoding.js';
 import { createApp } from './app.js';
 import { ConfigurationError, loadConfig } from './config.js';
 import { runMigrations } from './database/migrate.js';
@@ -12,7 +13,7 @@ async function main() {
     await runMigrations(database);
     await checkDatabase(database);
 
-    const app = createApp({ database });
+    const app = createApp({ database, geocoder: createGeocoder({ database, ...config.geocoding }) });
     const server = await new Promise((resolve, reject) => {
       const listening = app.listen(config.port, '0.0.0.0', () => resolve(listening));
       listening.once('error', reject);

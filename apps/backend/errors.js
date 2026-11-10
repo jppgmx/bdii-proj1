@@ -35,6 +35,7 @@ export function errorHandler(logger) {
       error = new ApiError(500, 'INTERNAL_ERROR', 'Não foi possível concluir a operação.');
     }
 
+    if (error.retryAfter) res.set('Retry-After', String(error.retryAfter));
     res.status(error.status).json({
       error: { code: error.code, message: error.message, ...(error.fields ? { fields: error.fields } : {}) },
     });

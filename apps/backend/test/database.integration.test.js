@@ -116,3 +116,107 @@ test('etapa 2: CRUD persistente, bbox inclusivo, validação e carga idempotente
   await request(`/paradas/${created.id}`, 404, 'PUT', data);
   assert.equal(await Parada.findByPk(created.id), null);
 });
+
+test('etapa 3: Nominatim, cache persistente, concorrência, limites e erros HTTP', { timeout: 30000 }, async t => {
+  const { createGeocoder } = await import('../services/geocoding.js');
+  const database = createDatabase(loadConfig().database);
+  t.after(() => database.close());
+  await runMigrations(database);
+  // Banco dedicado: o teste não consulta o serviço público.
+  await database.query('DELETE FROM geocoding_cache');
+  const resetGate = () => database.query("UPDATE geocoding_limits SET next_allowed = clock_timestamp() - INTERVAL '1 second' WHERE id = 1");
+  await resetGate();
+  let calls = 0;
+  let handle = async () => new Response(JSON.stringify([{ display_name: ' Cajazeiras, Paraíba ', lon: '-38.55', lat: '-6.88' }]));
+  const service = () => createGeocoder({ database, fetchImpl: async (url, options) => {
+    calls++;
+    assert.equal(url.searchParams.get('format'), 'jsonv2');
+    assert.equal(url.searchParams.get('limit'), '5');
+    assert.equal(url.searchParams.get('accept-language'), 'pt-BR');
+    assert.equal(url.searchParams.has('bounded'), false);
+    assert.match(options.headers['User-Agent'], /bdii-proj1/);
+    assert.equal(options.redirect, 'error');
+    return handle(url, options);
+  } });
+  let geocoder = service();
+  const expected = [{ nome: 'Cajazeiras, Paraíba', localizacao: { type: 'Point', coordinates: [-38.55, -6.88] } }];
+  assert.deepEqual(await geocoder.search(' Cajazeiras, Paraíba '), expected);
+  assert.equal(calls, 1);
+  geocoder = service(); // Outra instância usa o mesmo cache, sem consumir nova chamada.
+  assert.deepEqual(await geocoder.search('CAJAZEIRAS,  PARAÍBA'), expected);
+  assert.equal(calls, 1);
+  await assert.rejects(geocoder.search('Sousa, Paraíba'), error => error.status === 429 && error.retryAfter >= 1);
+  assert.equal(calls, 1);
+
+  const server = createApp({ database, geocoder }).listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  t.after(() => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }));
+  const request = q => fetch(`http://127.0.0.1:${server.address().port}/api/geocodificacao${q}`);
+  for (const q of ['', '?q=ab', '?q=Sousa&q=Cajazeiras']) {
+    const response = await request(q);
+    assert.equal(response.status, 400);
+    assert.ok((await response.json()).error.fields.q);
+  }
+  const hit = await request('?q=Cajazeiras%2C%20Para%C3%ADba');
+  assert.equal(hit.status, 200);
+  assert.match(hit.headers.get('link'), /openstreetmap.org\/copyright/);
+  assert.deepEqual(await hit.json(), expected);
+  await resetGate();
+  handle = async () => new Response('[]');
+  assert.deepEqual(await geocoder.search('Local sem resultado'), []);
+  assert.deepEqual(await service().search('Local sem resultado'), []);
+
+  // Consultas concorrentes entre instâncias nunca chamam o provedor em paralelo.
+  await resetGate();
+  let release;
+  let started;
+  const began = new Promise(resolve => { started = resolve; });
+  const block = new Promise(resolve => { release = resolve; });
+  handle = async () => { started(); await block; return new Response('[]'); };
+  const pending = geocoder.search('Primeira concorrente');
+  await began;
+  try {
+    const other = await createAppRequest();
+    assert.equal(other.status, 429);
+    assert.equal(other.headers.get('retry-after'), '1');
+    assert.equal((await other.json()).error.code, 'RATE_LIMITED');
+  } finally { release(); }
+  await pending;
+  async function createAppRequest() { return request('?q=Outra%20concorrente'); }
+
+  for (const [label, handler, status, code] of [
+    ['indisponível', async () => new Response('segredo', { status: 503 }), 502, 'GEOCODING_UNAVAILABLE'],
+    ['JSON inválido', async () => new Response('not-json'), 502, 'GEOCODING_UNAVAILABLE'],
+    ['objeto inválido', async () => new Response('{}'), 502, 'GEOCODING_UNAVAILABLE'],
+    ['coordenadas inválidas', async () => new Response(JSON.stringify([{ display_name: 'x', lat: null, lon: '' }])), 502, 'GEOCODING_UNAVAILABLE'],
+    ['fora do globo', async () => new Response(JSON.stringify([{ display_name: 'x', lat: '91', lon: '0' }])), 502, 'GEOCODING_UNAVAILABLE'],
+    ['rede', async () => { throw new TypeError('segredo'); }, 502, 'GEOCODING_UNAVAILABLE'],
+    ['tempo', async () => { throw new DOMException('segredo', 'TimeoutError'); }, 504, 'GEOCODING_TIMEOUT'],
+  ]) {
+    await resetGate(); handle = handler;
+    const response = await request(`?q=${encodeURIComponent(label)}`);
+    assert.equal(response.status, status);
+    const body = await response.json();
+    assert.equal(body.error.code, code);
+    assert.doesNotMatch(JSON.stringify(body), /segredo/);
+    const [gate] = await database.query('SELECT next_allowed > clock_timestamp() AS active FROM geocoding_limits', { type: QueryTypes.SELECT });
+    assert.equal(gate.active, true);
+  }
+  await resetGate();
+  handle = async () => new Response('[]', { status: 429, headers: { 'Retry-After': '30' } });
+  const limited = await request('?q=Limite%20do%20provedor');
+  assert.equal(limited.status, 429);
+  assert.equal(limited.headers.get('retry-after'), '30');
+  await assert.rejects(service().search('Outra após limite'), error => error.status === 429 && error.retryAfter >= 29);
+  // Resposta em cache continua disponível durante bloqueio do provedor.
+  assert.deepEqual(await geocoder.search('Cajazeiras, Paraíba'), expected);
+  await resetGate();
+  handle = async () => new Response(JSON.stringify(Array.from({ length: 7 }, () => ({ display_name: 'Sousa', lat: '-6.76', lon: '-38.23' }))));
+  assert.equal((await geocoder.search('Sete resultados')).length, 5);
+  await resetGate();
+  await database.query("UPDATE geocoding_cache SET expires_at = NOW() - INTERVAL '1 second'");
+  handle = async () => new Response('[]');
+  const count = calls;
+  assert.deepEqual(await geocoder.search('Cajazeiras, Paraíba'), []);
+  assert.equal(calls, count + 1);
+});

@@ -24,6 +24,24 @@ function port(value, name, fallback) {
   return Number(raw);
 }
 
+export function readGeocodingConfig(env = process.env) {
+  const url = env.GEOCODING_URL ?? 'https://nominatim.openstreetmap.org/search';
+  try {
+    const parsed = new URL(url);
+    if (!['https:', 'http:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash) throw new Error();
+  } catch {
+    throw new ConfigurationError('GEOCODING_URL deve ser uma URL HTTP(S) sem credenciais, query ou fragmento.');
+  }
+  const userAgent = env.GEOCODING_USER_AGENT ?? 'TransporteUniversitarioBDII/0.1 (https://github.com/jppgmx/bdii-proj1)';
+  if (!userAgent.trim() || /[^\x20-\x7e]/.test(userAgent)) throw new ConfigurationError('GEOCODING_USER_AGENT deve identificar a aplicação em texto ASCII.');
+  const integer = (name, fallback, max) => {
+    const value = env[name] ?? String(fallback);
+    if (!/^\d+$/.test(value) || Number(value) < 1 || Number(value) > max) throw new ConfigurationError(`${name} deve ser um inteiro entre 1 e ${max}.`);
+    return Number(value);
+  };
+  return { url, userAgent, timeoutMs: integer('GEOCODING_TIMEOUT_MS', 5000, 60000), cacheTtlSeconds: integer('GEOCODING_CACHE_TTL_SECONDS', 86400, 604800) };
+}
+
 export function readConfig(env = process.env) {
   const ssl = env.PG_SSL ?? 'false';
   if (!['true', 'false'].includes(ssl)) {
@@ -31,6 +49,7 @@ export function readConfig(env = process.env) {
   }
 
   return {
+    geocoding: readGeocodingConfig(env),
     port: port(env.API_PORT, 'API_PORT', 3000),
     database: {
       host: required(env, 'PG_HOST'),
