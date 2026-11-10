@@ -3,7 +3,7 @@ WORKDIR /app/apps/backend
 COPY apps/backend/package.json apps/backend/package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-# Alvo utilizável enquanto a colega prepara o projeto React.
+# Alvo utilizável enquanto Millena Kelly prepara o projeto React.
 FROM node:26-bookworm-slim AS backend
 ENV NODE_ENV=production
 ENV API_PORT=3000

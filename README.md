@@ -2,13 +2,15 @@
 
 Projeto da disciplina de Banco de Dados II para cadastrar paradas no mapa, consultar proximidade e atualizar manualmente a posição de ônibus. Stack definida: Express, Sequelize, PostgreSQL/PostGIS, React, Leaflet e Docker.
 
-O React será configurado pela integrante responsável pelo frontend. O Dockerfile compilará esse projeto e o Express servirá os arquivos resultantes junto com a API, no mesmo endereço.
+**Integrantes:** João Paulo (backend e infraestrutura) e Millena Kelly (frontend).
+
+O React será configurado por Millena Kelly, responsável pelo frontend. O Dockerfile compilará esse projeto e o Express servirá os arquivos resultantes junto com a API, no mesmo endereço.
 
 ## Estado atual
 
 Branch `etapa-1`: base Express/Sequelize, migrações, saúde, erros JSON e infraestrutura Docker implementados. Os contratos, os dados e a base do backend vieram da etapa 0. A etapa 1 acrescenta uma rotina isolada de validação Docker/PostGIS e sua execução automática no GitHub Actions. CRUD e consultas de paradas começam na etapa 2.
 
-Cada próxima etapa terá sua própria branch `etapa-N`, mantendo a implementação gradual e os critérios de aceite do plano. O React continua sob responsabilidade da colega. `aplicacao-poi/` permanece como referência temporária, independente da execução do backend novo.
+Cada próxima etapa terá sua própria branch `etapa-N`, mantendo a implementação gradual e os critérios de aceite do plano. O React continua sob responsabilidade de Millena Kelly. `aplicacao-poi/` permanece como referência temporária, independente da execução do backend novo.
 
 O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. Os 15 testes HTTP/configuração/inicialização passaram e o Compose foi validado. A validação real de Docker/PostGIS passou: build do backend, teste de integração, saúde e preservação das migrações ao recriar os containers. A parte backend/infraestrutura da etapa 1 está validada; o React e o build completo continuam pendentes da entrega do frontend.
 
@@ -91,7 +93,7 @@ O workflow `.github/workflows/backend.yml` executa instalação pelo lockfile, o
 
 ## Integrar o React
 
-A colega entrega `apps/frontend/package.json`, lockfile e `npm run build` com saída em `dist/`. Depois dessa entrega, selecionar o alvo final:
+Millena Kelly entrega `apps/frontend/package.json`, lockfile e `npm run build` com saída em `dist/`. Depois dessa entrega, selecionar o alvo final:
 
 ```bash
 APP_BUILD_TARGET=production docker compose up --build -d

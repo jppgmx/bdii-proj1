@@ -1,6 +1,6 @@
 # Contrato de integração — React, Express e Docker
 
-Convenções definidas na etapa 0. A colega configura o React; o responsável pelo backend prepara o Express e os arquivos Docker na etapa 1.
+Convenções definidas na etapa 0. Millena Kelly configura o React; João Paulo prepara o Express e os arquivos Docker na etapa 1.
 
 ## Diretórios e comandos
 
@@ -8,7 +8,7 @@ Convenções definidas na etapa 0. A colega configura o React; o responsável pe
 | --- | --- |
 | Backend | `apps/backend/`, Express com Sequelize e `pg`, módulos ES. |
 | Runtime | Node.js 26, também utilizado nos estágios do Dockerfile. |
-| Frontend | `apps/frontend/`, React com Leaflet. A ferramenta de build fica a cargo da colega. |
+| Frontend | `apps/frontend/`, React com Leaflet. A ferramenta de build fica a cargo de Millena Kelly. |
 | Dependências | npm em cada projeto, com `package-lock.json` versionado e instalação por `npm ci`. Sem workspace npm nesta versão. |
 | Backend em produção | `npm start`, executado em `apps/backend/`. |
 | Backend em desenvolvimento | `npm run dev`, executado em `apps/backend/`. |
@@ -20,7 +20,7 @@ Convenções definidas na etapa 0. A colega configura o React; o responsável pe
 | Servidor React local | Porta `5173`, com proxy de `/api` para `http://localhost:3000`. |
 | Banco local | Serviço `db` no Compose, porta interna `5432`, volume persistente. |
 
-O projeto React deverá cumprir o contrato de comando e saída mesmo se usar outra ferramenta de build. Se alguma convenção precisar mudar, atualizar este documento e o Dockerfile juntos. O build completo só será verificado quando o React estiver entregue; não criar uma configuração substituta no lugar da colega.
+O projeto React deverá cumprir o contrato de comando e saída mesmo se usar outra ferramenta de build. Se alguma convenção precisar mudar, atualizar este documento e o Dockerfile juntos. O build completo só será verificado quando o React estiver entregue; não criar uma configuração substituta no lugar de Millena Kelly.
 
 ## Caminho das requisições
 
@@ -68,13 +68,13 @@ Nominatim é o candidato inicial à geocodificação. Se for adotado, o frontend
 
 ## Aceite da integração
 
-1. A colega entrega `package.json`, lockfile e código do frontend; `npm ci` e `npm run build` produzem `dist/index.html` e assets.
-2. O responsável pelo backend confirma que os arquivos são copiados para `public/` e servidos pelo Express.
+1. Millena Kelly entrega `package.json`, lockfile e código do frontend; `npm ci` e `npm run build` produzem `dist/index.html` e assets.
+2. João Paulo confirma que os arquivos são copiados para `public/` e servidos pelo Express.
 3. No desenvolvimento, chamadas a `/api/health` passam pelo proxy do React.
 4. Na imagem final, frontend e API funcionam na porta 3000, sem servidor React separado.
 5. Uma API inexistente retorna JSON 404; geolocalização, carregamento do mapa e persistência são verificados nos ambientes correspondentes.
 
-As verificações acima pertencem às etapas 1 e 6. A base Express/PostGIS, as migrações e os arquivos Docker estão implementados. Os testes HTTP usam banco simulado; a integração real e o build das imagens podem ser verificados com `bash scripts/validate-stage-1.sh`, também configurado no workflow `backend.yml`. A rotina passou localmente na etapa 1, incluindo build do backend, PostGIS real, saúde e preservação das migrações após recriar containers. O healthcheck do banco usa TCP para não aceitar o servidor temporário da inicialização como pronto. O React permanece a cargo da colega.
+As verificações acima pertencem às etapas 1 e 6. A base Express/PostGIS, as migrações e os arquivos Docker estão implementados. Os testes HTTP usam banco simulado; a integração real e o build das imagens podem ser verificados com `bash scripts/validate-stage-1.sh`, também configurado no workflow `backend.yml`. A rotina passou localmente na etapa 1, incluindo build do backend, PostGIS real, saúde e preservação das migrações após recriar containers. O healthcheck do banco usa TCP para não aceitar o servidor temporário da inicialização como pronto. O React permanece a cargo de Millena Kelly.
 
 ## Dependências
 
