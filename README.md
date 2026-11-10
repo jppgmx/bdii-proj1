@@ -10,7 +10,7 @@ Branch `etapa-1`: base Express/Sequelize, migrações, saúde, erros JSON e infr
 
 Cada próxima etapa terá sua própria branch `etapa-N`, mantendo a implementação gradual e os critérios de aceite do plano. O React continua sob responsabilidade da colega. `aplicacao-poi/` permanece como referência temporária, independente da execução do backend novo.
 
-O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. Os 15 testes HTTP/configuração/inicialização passaram e o Compose foi validado. A execução real de Docker/PostGIS ainda aguarda acesso ao Docker; o build com React também depende da entrega do frontend.
+O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. Os 15 testes HTTP/configuração/inicialização passaram e o Compose foi validado. A validação real de Docker/PostGIS passou: build do backend, teste de integração, saúde e preservação das migrações ao recriar os containers. A parte backend/infraestrutura da etapa 1 está validada; o React e o build completo continuam pendentes da entrega do frontend.
 
 ## Executar com Docker
 

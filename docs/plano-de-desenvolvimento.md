@@ -166,7 +166,7 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 - [x] Preparar Dockerfile com build React e Express servindo `public/`, conforme o contrato da seção 3; alvo `backend` disponível antes da entrega do React e alvo `production` para o pacote completo.
 - [x] Criar `compose.yaml` com aplicação, PostGIS, volume persistente e espera pela saúde do banco; definir como executar as migrações.
 - [x] Criar `.dockerignore`, excluindo dependências locais, arquivos `.env`, `.git` e `aplicacao-poi/` do contexto enviado ao build.
-- [ ] Validar o serviço PostGIS e o backend; registrar que a validação da imagem completa depende da entrega do React.
+- [x] Validar o serviço PostGIS e o backend; a validação da imagem completa depende da entrega do React.
 
 **Sua colega**
 
@@ -176,7 +176,7 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **Concluída quando:** backend conecta ao PostGIS e o contrato do build está documentado. A imagem completa será validada na etapa 6.
 
-**Verificação na branch `etapa-1`:** os 15 testes HTTP, configuração e falha de inicialização passaram com Node.js 26; configuração Compose e sintaxe da rotina de validação válidas. Acrescentados `scripts/validate-stage-1.sh` e workflow de CI para compilar o backend, testar PostGIS real, migrações concorrentes/repetíveis, saúde e preservação do histórico ao recriar containers. O acesso ao socket Docker ainda retorna permissão negada; a validação real permanece pendente até a execução bem-sucedida da rotina. A inclusão do workflow não equivale a uma execução remota aprovada. A parte React continua com a colega e a etapa 1 completa ainda não está concluída.
+**Verificação na branch `etapa-1`:** os 15 testes HTTP, configuração e falha de inicialização passaram com Node.js 26. A rotina `scripts/validate-stage-1.sh` passou com Docker/PostGIS real: build do alvo backend, integração com migrações concorrentes/repetíveis, saúde, erros JSON e preservação do histórico de migrações ao recriar ambos os containers. Corrigido o healthcheck do banco para usar TCP: a verificação por socket Unix marcava o servidor temporário do initdb como pronto antes de aceitar conexões do backend. Os containers e o volume exclusivos do teste foram removidos ao final. T01 (backend/infraestrutura) concluída; T02 (React, layout e proxy) permanece com a colega. O workflow de CI está preparado, mas sua execução remota ainda não foi verificada. O build completo com React será validado após sua entrega, na etapa 6.
 
 ### Etapa 2 — Adaptar o CRUD de POIs para paradas
 
