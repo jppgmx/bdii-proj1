@@ -7,6 +7,16 @@ export function bboxFromBounds(bounds) {
   ].join(',');
 }
 
+export function stopsUrl(bbox, proximity) {
+  if (!proximity) return `/api/paradas?bbox=${bbox}`;
+  const { position: { lat, lng }, radius } = proximity;
+  return `/api/paradas/proximas?lat=${lat}&lng=${lng}&raio_m=${radius}&bbox=${bbox}`;
+}
+
+export function formatDistance(meters) {
+  return `${Math.round(meters)} m`;
+}
+
 export async function api(path, { method = 'GET', body, signal } = {}) {
   let response;
   try {

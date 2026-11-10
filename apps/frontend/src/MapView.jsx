@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { circleMarker, icon, layerGroup, map, marker, tileLayer } from 'leaflet';
+import { circle, circleMarker, icon, layerGroup, map, marker, tileLayer } from 'leaflet';
 import markerUrl from 'leaflet/dist/images/marker-icon.png';
 import markerRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
@@ -29,13 +29,15 @@ const draftIcon = icon({
   className: 'draft-pin',
 });
 
-export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
+export default function MapView({ stops, draft, onBounds, onPoint, onEdit, onLocation, userPosition, radius }) {
   const container = useRef(null);
+  const mapView = useRef(null);
   const layers = useRef(null);
   const [locationStatus, setLocationStatus] = useState('Buscando sua localização…');
 
   useEffect(() => {
     const view = map(container.current, { worldCopyJump: true }).setView(initialCenter, initialZoom);
+    mapView.current = view;
     view.attributionControl.setPrefix(false);
     tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -45,6 +47,7 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
     layers.current = {
       stops: layerGroup().addTo(view),
       draft: layerGroup().addTo(view),
+      radius: layerGroup().addTo(view),
     };
     const reportBounds = () => onBounds(bboxFromBounds(view.getBounds()));
     const selectPoint = ({ latlng }) => onPoint([latlng.lat, latlng.wrap().lng]);
@@ -55,7 +58,7 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
     let active = true;
     function fail(message) {
       if (!active) return;
-      setLocationStatus(`${message} A localização padrão é Cajazeiras-PB.`);
+      setLocationStatus(`${message} O filtro por raio está indisponível. A localização padrão do mapa é Cajazeiras-PB.`);
     }
 
     if (navigator.geolocation) {
@@ -69,6 +72,7 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
         circleMarker(point, { radius: 9, color: '#fff', fillColor: '#0759b5', fillOpacity: 1 })
           .bindTooltip('Sua localização').addTo(view);
         view.setView(point, initialZoom);
+        onLocation({ lat: coords.latitude, lng: coords.longitude });
         setLocationStatus('Mapa centralizado na sua localização.');
       }, ({ code }) => fail(locationErrors[code] ?? locationErrors[2]), {
         maximumAge: maxAge,
@@ -82,7 +86,17 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
       active = false;
       view.remove();
     };
-  }, [onBounds, onPoint]);
+  }, [onBounds, onPoint, onLocation]);
+
+  useEffect(() => {
+    const layer = layers.current.radius;
+    layer.clearLayers();
+    if (userPosition && radius !== null) {
+      const { lat, lng } = userPosition;
+      const area = circle([lat, lng], { radius, interactive: false }).addTo(layer);
+      mapView.current.fitBounds(area.getBounds(), { padding: [16, 16], animate: false });
+    }
+  }, [userPosition, radius]);
 
   useEffect(() => {
     const layer = layers.current.stops;

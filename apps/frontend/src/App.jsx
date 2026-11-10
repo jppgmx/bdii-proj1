@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import MapView from './MapView.jsx';
-import { api, latestRequest, pointToLatLng } from './paradas.js';
+import { api, formatDistance, latestRequest, pointToLatLng, stopsUrl } from './paradas.js';
 import { UniversityForm, StopForm } from './Forms.jsx';
 
 const connectionError = 'Não foi possível conectar à API.';
 const invalidResponse = 'A API retornou uma resposta de saúde inesperada.';
+const radii = [[500, '500 m'], [1000, '1 km'], [2000, '2 km']];
 
 async function checkHealth(signal) {
   let response;
@@ -56,10 +57,13 @@ export default function App() {
   const [formKey, setFormKey] = useState(0);
   const [newUniversity, setNewUniversity] = useState('');
   const [busy, setBusy] = useState(false);
+  const [userPosition, setUserPosition] = useState(null);
+  const [radius, setRadius] = useState(null);
   const bounds = useRef(null);
+  const proximity = useRef(null);
 
   const [stopRequests] = useState(() => latestRequest(
-    (signal, bbox) => api(`/api/paradas?bbox=${bbox}`, { signal }),
+    (signal, bbox, filter) => api(stopsUrl(bbox, filter), { signal }),
     (items) => setStopList({ items }),
     (error) => setStopList({ items: [], error: error.message }),
   ));
@@ -67,7 +71,7 @@ export default function App() {
   const loadStops = useCallback((bbox) => {
     bounds.current = bbox;
     setStopList({ loading: true, items: [] });
-    stopRequests.run(bbox);
+    stopRequests.run(bbox, proximity.current);
   }, [stopRequests]);
 
   useEffect(() => () => stopRequests.cancel(), [stopRequests]);
@@ -101,6 +105,16 @@ export default function App() {
     if (bounds.current) loadStops(bounds.current);
   }
 
+  function selectRadius(nextRadius) {
+    if (nextRadius === radius) return;
+    proximity.current = nextRadius === null ? null : { position: userPosition, radius: nextRadius };
+    stopRequests.cancel();
+    setRadius(nextRadius);
+    // Enquadrar o círculo dispara moveend com a nova área visível.
+    if (nextRadius === null) refreshStops();
+    else setStopList({ loading: true, items: [] });
+  }
+
   function addUniversity(university) {
     setUniversities((items) => [...items, university].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
     setNewUniversity(university.id);
@@ -113,7 +127,8 @@ export default function App() {
         <p>Cajazeiras e Sousa · Paraíba</p>
       </header>
       <div className="layout">
-        <MapView stops={stopList.items} draft={point} onBounds={loadStops} onPoint={setPoint} onEdit={editStop} />
+        <MapView stops={stopList.items} draft={point} onBounds={loadStops} onPoint={setPoint}
+          onEdit={editStop} onLocation={setUserPosition} userPosition={userPosition} radius={radius} />
         <aside aria-labelledby="panel-title">
           <h2 id="panel-title">Painel</h2>
           <p role="status">{health}</p>
@@ -122,8 +137,17 @@ export default function App() {
           <UniversityForm onCreated={addUniversity} disabled={universityStatus.loading} />
           <StopForm key={formKey} stop={selected} universities={universities} newUniversity={newUniversity}
             point={point} busy={busy} setBusy={setBusy} onReset={resetStop} onSaved={refreshStops} />
+          <fieldset disabled={!userPosition}>
+            <legend>Raio de busca</legend>
+            {radii.map(([value, label]) => (
+              <button key={value} type="button" aria-pressed={radius === value} onClick={() => selectRadius(value)}>
+                {label}
+              </button>
+            ))}
+            <button type="button" disabled={radius === null} onClick={() => selectRadius(null)}>Limpar filtro</button>
+          </fieldset>
           <section className="stop-list" aria-labelledby="stop-list-title">
-            <h3 id="stop-list-title">Paradas na área visível</h3>
+            <h3 id="stop-list-title">{radius === null ? 'Paradas na área visível' : 'Paradas no raio e na área visível'}</h3>
             {stopList.loading && <p role="status">Carregando paradas…</p>}
             {stopList.error && (
               <div role="alert">
@@ -132,11 +156,12 @@ export default function App() {
               </div>
             )}
             {!stopList.loading && !stopList.error && stopList.items.length === 0 &&
-              <p role="status">Nenhuma parada na área visível.</p>}
+              <p role="status">{radius === null ? 'Nenhuma parada na área visível.' : 'Nenhuma parada no raio e na área visível.'}</p>}
             <ul>
               {stopList.items.map((stop) => (
                 <li key={stop.id}>
                   <button type="button" disabled={busy} onClick={() => editStop(stop)}>{stop.nome}</button>
+                  {radius !== null && <small>{formatDistance(stop.distancia_m)}</small>}
                   <small>Atualizada em <time dateTime={stop.updatedAt}>
                     {new Date(stop.updatedAt).toLocaleString('pt-BR')}
                   </time></small>
