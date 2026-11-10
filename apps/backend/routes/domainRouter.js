@@ -2,7 +2,7 @@ import express from 'express';
 import { QueryTypes } from 'sequelize';
 import { defineModels } from '../model/index.js';
 import { ApiError } from '../errors.js';
-import { bboxInput, invalid, paradaInput, universidadeInput, uuid } from '../validation.js';
+import { bboxInput, invalid, paradaInput, proximityInput, universidadeInput, uuid } from '../validation.js';
 
 export function createDomainRouter(database) {
   const router = express.Router();
@@ -24,6 +24,24 @@ export function createDomainRouter(database) {
       WHERE ST_Covers(ST_MakeEnvelope($1, $2, $3, $4, 4326), localizacao)
       ORDER BY nome, id
     `, { bind, type: QueryTypes.SELECT });
+    res.json(rows);
+  });
+  // A rota de proximidade deve preceder /paradas/:id.
+  router.get('/paradas/proximas', async (req, res) => {
+    const { lat, lng, raio_m, bbox } = proximityInput(req.query);
+    const rows = await database.query(`
+      WITH origem AS (
+        SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography AS ponto
+      )
+      SELECT p.id, p.nome, p.descricao, p.universidade_id,
+        json_build_object('type', 'Point', 'coordinates', json_build_array(ST_X(p.localizacao), ST_Y(p.localizacao))) AS localizacao,
+        p."createdAt", p."updatedAt",
+        ST_Distance(p.localizacao::geography, origem.ponto) AS distancia_m
+      FROM paradas p CROSS JOIN origem
+      WHERE ST_Covers(ST_MakeEnvelope($3, $4, $5, $6, 4326), p.localizacao)
+        AND ST_DWithin(p.localizacao::geography, origem.ponto, $7)
+      ORDER BY distancia_m, p.id
+    `, { bind: [lng, lat, ...bbox, raio_m], type: QueryTypes.SELECT });
     res.json(rows);
   });
   async function find(id) {
