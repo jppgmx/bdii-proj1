@@ -7,5 +7,6 @@
 **/coverage
 **/*.log
 aplicacao-poi
-docs
+docs/*
+!docs/dados-demonstracao.json
 apps/backend/test

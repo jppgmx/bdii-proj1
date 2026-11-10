@@ -1,3 +1,5 @@
+import { ConnectionError, ForeignKeyConstraintError } from 'sequelize';
+
 export class ApiError extends Error {
   constructor(status, code, message) {
     super(message);
@@ -20,6 +22,13 @@ export function errorHandler(logger) {
       error = new ApiError(413, 'PAYLOAD_TOO_LARGE', 'O corpo excede o limite de 100 KB.');
     }
 
+    if (error instanceof ConnectionError) {
+      error = new ApiError(503, 'DATABASE_UNAVAILABLE', 'Banco de dados indisponível.');
+    } else if (error instanceof ForeignKeyConstraintError) {
+      error = new ApiError(400, 'VALIDATION_ERROR', 'Dados inválidos.');
+      error.fields = { universidade_id: 'Universidade não encontrada.' };
+    }
+
     if (!(error instanceof ApiError)) {
       // Não registrar mensagens que possam carregar SQL, URLs ou credenciais.
       logger.error(`Falha interna na requisição (${error.name ?? 'Error'}).`);
@@ -27,7 +36,7 @@ export function errorHandler(logger) {
     }
 
     res.status(error.status).json({
-      error: { code: error.code, message: error.message },
+      error: { code: error.code, message: error.message, ...(error.fields ? { fields: error.fields } : {}) },
     });
   };
 }

@@ -11,8 +11,9 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "db:migrate": "node database/migrate.js",
-    "test": "node --test test/app.test.js test/config.test.js test/startup.test.js",
-    "test:integration": "node --test test/database.integration.test.js"
+    "test": "node --test test/app.test.js test/config.test.js test/startup.test.js test/validation.test.js",
+    "test:integration": "node --test test/database.integration.test.js",
+    "db:seed": "node database/seed.js"
   },
   "dependencies": {
     "dotenv": "^18.0.4",
