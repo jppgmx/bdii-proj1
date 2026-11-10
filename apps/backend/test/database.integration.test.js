@@ -296,3 +296,90 @@ test('etapa 4: proximidade em metros, filtros combinados, limite do raio e desem
   const [index] = await database.query("SELECT indexdef FROM pg_indexes WHERE tablename = 'paradas' AND indexname = 'paradas_localizacao_geography_gist'", { type: QueryTypes.SELECT });
   assert.match(index.indexdef, /USING gist.*geography/i);
 });
+
+test('etapa 5: ônibus sem posição, atualização persistente e seed preservando posição', { timeout: 30000 }, async t => {
+  const { defineModels } = await import('../model/index.js');
+  const { seedDemo } = await import('../database/seed.js');
+  const database = createDatabase(loadConfig().database);
+  let universityId;
+  t.after(async () => {
+    try {
+      if (universityId) {
+        const { Onibus, Universidade } = defineModels(database);
+        await Onibus.destroy({ where: { universidade_id: universityId } });
+        await Universidade.destroy({ where: { id: universityId } });
+      }
+    } finally { await database.close(); }
+  });
+  await runMigrations(database);
+  await seedDemo(database);
+  const { Universidade, Onibus } = defineModels(database);
+  universityId = (await Universidade.create({ nome: 'Teste de ônibus' })).id;
+  async function client() {
+    const server = createApp({ database }).listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    t.after(() => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }));
+    return async (path, status = 200, method = 'GET', body) => {
+      const response = await fetch(`http://127.0.0.1:${server.address().port}/api/onibus${path}`, {
+        method, headers: { 'Content-Type': 'application/json' },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+      const result = await response.json();
+      assert.equal(response.status, status, JSON.stringify(result));
+      return result;
+    };
+  }
+  const request = await client();
+  const anotherClient = await client();
+  const created = await request('', 201, 'POST', { identificacao: ' TESTE-01 ', universidade_id: universityId });
+  assert.equal(created.identificacao, 'TESTE-01');
+  assert.equal(created.posicao_atual, null);
+  assert.equal(created.posicao_atualizada_em, null);
+  assert.ok((await request('')).some(row => row.id === created.id));
+  assert.ok(!(await request('/posicoes?bbox=-180,-90,180,90')).some(row => row.id === created.id));
+  const point = { type: 'Point', coordinates: [10, 20] };
+  const updated = await request(`/${created.id}/posicao`, 200, 'PATCH', { posicao_atual: point });
+  assert.deepEqual(updated.posicao_atual, point);
+  assert.equal(updated.createdAt, created.createdAt);
+  assert.equal(updated.identificacao, created.identificacao);
+  assert.equal(updated.universidade_id, universityId);
+  assert.ok(Number.isFinite(Date.parse(updated.posicao_atualizada_em)));
+  assert.ok(Date.parse(updated.posicao_atualizada_em) >= Date.parse(created.createdAt));
+  assert.ok(Date.parse(updated.updatedAt) >= Date.parse(created.updatedAt));
+  const persisted = (await anotherClient('')).find(row => row.id === created.id);
+  assert.deepEqual(persisted, updated);
+  const spatial = await database.query('SELECT ST_SRID(posicao_atual) AS srid, GeometryType(posicao_atual) AS type FROM onibus WHERE id = $1', { bind: [created.id], type: QueryTypes.SELECT });
+  assert.deepEqual(spatial[0], { srid: 4326, type: 'POINT' });
+  for (const bbox of ['10,20,11,21', '9,19,10,20']) assert.ok((await request(`/posicoes?bbox=${bbox}`)).some(row => row.id === created.id));
+  assert.deepEqual(await request('/posicoes?bbox=11,21,12,22'), []);
+  assert.ok((await request('/posicoes', 400)).error.fields.bbox);
+  await request('/posicoes?bbox=0,0,1m,1', 400);
+  await request('', 400, 'POST', { identificacao: 'TESTE', universidade_id: 'ffffffff-ffff-4fff-8fff-ffffffffffff' });
+  await request('', 400, 'POST', { identificacao: 'TESTE', universidade_id: universityId, posicao_atual: point });
+  await request('/invalido/posicao', 400, 'PATCH', { posicao_atual: point });
+  await request('/ffffffff-ffff-4fff-8fff-ffffffffffff/posicao', 404, 'PATCH', { posicao_atual: point });
+  for (const body of [{}, { posicao_atual: null }, { posicao_atual: point, posicao_atualizada_em: '2000-01-01T00:00:00Z' }]) {
+    await request(`/${created.id}/posicao`, 400, 'PATCH', body);
+    assert.deepEqual((await anotherClient('')).find(row => row.id === created.id), updated);
+  }
+  const moved = await request(`/${created.id}/posicao`, 200, 'PATCH', { posicao_atual: { type: 'Point', coordinates: [11, 21] } });
+  assert.deepEqual((await anotherClient('')).find(row => row.id === created.id), moved);
+  assert.deepEqual(await request('/posicoes?bbox=9,19,10,20'), []);
+  assert.ok((await request('/posicoes?bbox=11,21,12,22')).some(row => row.id === created.id));
+
+  // Mesmo nome e posição devem desempatar por UUID nas listagens.
+  const twin = await request('', 201, 'POST', { identificacao: 'TESTE-01', universidade_id: universityId });
+  const ids = [created.id, twin.id].sort();
+  assert.deepEqual((await request('')).filter(row => ids.includes(row.id)).map(row => row.id), ids);
+  const demoId = '30000000-0000-4000-8000-000000000001';
+  const demo = (await request('')).find(row => row.id === demoId);
+  assert.equal(demo.posicao_atual, null);
+  const demoPosition = { type: 'Point', coordinates: [-38.54534133432616, -6.889266108880796] };
+  const savedDemo = await request(`/${demoId}/posicao`, 200, 'PATCH', { posicao_atual: demoPosition });
+  await seedDemo(database);
+  await seedDemo(database);
+  assert.equal(await Onibus.count({ where: { id: demoId } }), 1);
+  assert.deepEqual((await anotherClient('')).find(row => row.id === demoId), savedDemo);
+  const [index] = await database.query("SELECT indexdef FROM pg_indexes WHERE tablename = 'onibus' AND indexname = 'onibus_posicao_atual_gist'", { type: QueryTypes.SELECT });
+  assert.match(index.indexdef, /USING gist.*posicao_atual/i);
+});

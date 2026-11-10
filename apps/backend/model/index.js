@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 
 export function defineModels(database) {
-  if (database.models.Universidade && database.models.Parada) return database.models;
+  if (database.models.Universidade && database.models.Parada && database.models.Onibus) return database.models;
   const id = () => ({ type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true });
   const Universidade = database.define('Universidade', {
     id: id(),
@@ -22,5 +22,17 @@ export function defineModels(database) {
     data.localizacao = { type: 'Point', coordinates: data.localizacao.coordinates };
     return data;
   };
-  return { Universidade, Parada };
+  const Onibus = database.define('Onibus', {
+    id: id(),
+    identificacao: { type: DataTypes.STRING(60), allowNull: false },
+    universidade_id: { type: DataTypes.UUID, allowNull: false, references: { model: 'universidades', key: 'id' } },
+    posicao_atual: { type: DataTypes.GEOMETRY('POINT', 4326), defaultValue: null },
+    posicao_atualizada_em: { type: DataTypes.DATE, defaultValue: null },
+  }, { tableName: 'onibus' });
+  Onibus.prototype.toJSON = function () {
+    const data = this.get({ plain: true });
+    if (data.posicao_atual) data.posicao_atual = { type: 'Point', coordinates: data.posicao_atual.coordinates };
+    return data;
+  };
+  return { Universidade, Parada, Onibus };
 }

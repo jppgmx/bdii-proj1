@@ -8,11 +8,11 @@ O React será configurado por Millena Kelly, responsável pelo frontend. O Docke
 
 ## Estado atual
 
-Branch `etapa-4`: backend de busca por proximidade implementado. `GET /api/paradas/proximas` combina raio em metros e área visível, retorna `distancia_m` e ordena por distância e ID. Universidades, CRUD espacial, carga de demonstração e geocodificação Nominatim continuam disponíveis.
+Branch `etapa-5`: backend de ônibus e posição manual implementado. O cadastro começa sem posição; o painel lista todos os ônibus, enquanto o mapa consulta somente posições dentro de um `bbox` obrigatório. A atualização manual salva ponto e horário do servidor na mesma operação.
 
-O frontend continua sob responsabilidade de Millena Kelly, incluindo controles de raio, círculo, geolocalização e exibição das distâncias. Nenhum arquivo de frontend foi alterado nesta etapa. Ônibus pertencem à etapa 5.
+Universidades, CRUD espacial de paradas, proximidade e geocodificação Nominatim continuam disponíveis. O frontend permanece com Millena Kelly, incluindo cadastro, marcadores, salvar/cancelar posição e apresentação do horário. Nenhum arquivo de frontend foi alterado nesta etapa; não há rastreamento em tempo real.
 
-O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo; o build completo com React depende da entrega do frontend.
+O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. A integração final e publicação pertencem à etapa 6 e dependem da entrega do frontend.
 
 ## Executar com Docker
 
@@ -73,7 +73,7 @@ A integração aplica migrações e carrega os oito locais de demonstração no 
 
 ## Carregar os dados de demonstração
 
-A carga é opcional e não roda ao iniciar o servidor. Ela usa o JSON de `docs/dados-demonstracao.json`, em uma transação, e cria oito universidades/campi e oito paradas com IDs estáveis. Repetir o comando preserva registros existentes e edições, sem duplicar IDs. Ônibus serão acrescentados na etapa 5.
+A carga é opcional e não roda ao iniciar o servidor. Ela usa o JSON de `docs/dados-demonstracao.json`, em uma transação, e cria oito universidades/campi, oito paradas e o ônibus `DEMO-01` com IDs estáveis. Repetir o comando preserva registros existentes e edições, sem duplicar IDs. O ônibus começa sem posição; repetir a carga preserva uma posição já salva e seu horário.
 
 Com o Compose iniciado:
 
@@ -104,6 +104,24 @@ API_PORT=33001 PG_PORT=55433 bash scripts/validate-backend.sh
 Ao terminar, inclusive em caso de falha, remove os containers e o volume exclusivos do teste. Os dados desse teste são descartáveis. O ambiente de desenvolvimento iniciado com os comandos anteriores usa outro projeto e volume.
 
 O workflow `.github/workflows/backend.yml` executa instalação pelo lockfile, os testes locais e essa validação em pushes e pull requests. A inclusão do workflow não comprova uma execução remota: conferir o resultado no GitHub após publicar a branch.
+
+## Cadastrar ônibus e atualizar posição manualmente
+
+```bash
+curl 'http://localhost:3000/api/onibus'
+curl -X POST 'http://localhost:3000/api/onibus' -H 'Content-Type: application/json' \
+  -d '{"identificacao":"DEMO-02","universidade_id":"10000000-0000-4000-8000-000000000001"}'
+curl -X PATCH 'http://localhost:3000/api/onibus/30000000-0000-4000-8000-000000000001/posicao' \
+  -H 'Content-Type: application/json' \
+  -d '{"posicao_atual":{"type":"Point","coordinates":[-38.54534133432616,-6.889266108880796]}}'
+curl 'http://localhost:3000/api/onibus/posicoes?bbox=-38.58,-6.91,-38.53,-6.86'
+```
+
+O exemplo usa universidades e o ônibus da carga de demonstração. O cadastro aceita apenas `identificacao` (1 a 60 caracteres) e `universidade_id` existente, e inicia `posicao_atual` e `posicao_atualizada_em` como `null`. A identificação não é única: listagens são ordenadas por identificação e ID.
+
+`GET /api/onibus` alimenta o painel, inclusive com ônibus sem posição. `GET /api/onibus/posicoes` exige `bbox` e retorna somente ônibus posicionados na área, incluindo suas bordas, com índice GiST.
+
+O PATCH aceita apenas o ponto GeoJSON e devolve o estado gravado. O horário vem do banco; o cliente não envia datas nem pode limpar a posição com `null`. Uma segunda sessão vê a alteração ao consultar novamente. Se houver duas gravações, prevalece a última; cancelar na interface não envia requisição. UUID inválido retorna 400 e ônibus inexistente retorna 404. Falhas de validação preservam a última posição confirmada.
 
 ## Buscar paradas próximas
 

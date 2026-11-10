@@ -245,9 +245,9 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **João Paulo**
 
-- [ ] Criar migração e modelo de ônibus com universidade, ponto opcional e horário da posição.
-- [ ] Implementar cadastro, listagem para seleção e listagem de posições por `bbox` com índice espacial.
-- [ ] Implementar atualização de posição, salvando ponto e horário do servidor juntos e retornando o estado persistido.
+- [x] Criar migração e modelo de ônibus com universidade, ponto opcional e horário da posição.
+- [x] Implementar cadastro, listagem para seleção e listagem de posições por `bbox` com índice espacial.
+- [x] Implementar atualização de posição, salvando ponto e horário do servidor juntos e retornando o estado persistido.
 
 **Millena Kelly**
 
@@ -258,6 +258,8 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 - [ ] Disponibilizar atualização da consulta para visualizar mudanças salvas por outra pessoa.
 
 **Concluída quando:** salvar altera a posição no banco e em outro navegador após atualizar a consulta; cancelar não altera os dados. Não é necessário tempo real ou animação.
+
+**Verificação do backend na `etapa-5`:** 22 testes locais e cinco testes de integração com PostGIS real aprovados. Cadastro sem posição, listagens do painel/mapa, filtro inclusivo por bbox, SRID/índice, validação e posição com horário do servidor foram conferidos. Uma segunda sessão lê o estado salvo; falhas de validação preservam esse estado. A carga de demonstração inclui DEMO-01 sem duplicar e preserva sua posição/horário após novas cargas. Build, migrações e posição após recriar aplicação/banco aprovados. T09 concluída; T10 permanece com Millena Kelly, sem alterações no frontend.
 
 ### Etapa 6 — Validar o pacote Docker e publicar
 
