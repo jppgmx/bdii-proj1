@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { circle, circleMarker, icon, layerGroup, map, marker, tileLayer } from 'leaflet';
 import markerUrl from 'leaflet/dist/images/marker-icon.png';
 import markerRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
@@ -33,7 +33,12 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit, onLoc
   const container = useRef(null);
   const mapView = useRef(null);
   const layers = useRef(null);
+  const callbacks = useRef({ onBounds, onPoint, onLocation });
   const [locationStatus, setLocationStatus] = useState('Buscando sua localização…');
+
+  useLayoutEffect(() => {
+    callbacks.current = { onBounds, onPoint, onLocation };
+  });
 
   useEffect(() => {
     const view = map(container.current, { worldCopyJump: true }).setView(initialCenter, initialZoom);
@@ -49,8 +54,8 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit, onLoc
       draft: layerGroup().addTo(view),
       radius: layerGroup().addTo(view),
     };
-    const reportBounds = () => onBounds(bboxFromBounds(view.getBounds()));
-    const selectPoint = ({ latlng }) => onPoint([latlng.lat, latlng.wrap().lng]);
+    const reportBounds = () => callbacks.current.onBounds(bboxFromBounds(view.getBounds()));
+    const selectPoint = ({ latlng }) => callbacks.current.onPoint([latlng.lat, latlng.wrap().lng]);
     view.on('moveend', reportBounds);
     view.on('click', selectPoint);
     reportBounds();
@@ -72,7 +77,7 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit, onLoc
         circleMarker(point, { radius: 9, color: '#fff', fillColor: '#0759b5', fillOpacity: 1 })
           .bindTooltip('Sua localização').addTo(view);
         view.setView(point, initialZoom);
-        onLocation({ lat: coords.latitude, lng: coords.longitude });
+        callbacks.current.onLocation({ lat: coords.latitude, lng: coords.longitude });
         setLocationStatus('Mapa centralizado na sua localização.');
       }, ({ code }) => fail(locationErrors[code] ?? locationErrors[2]), {
         maximumAge: maxAge,
@@ -86,7 +91,7 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit, onLoc
       active = false;
       view.remove();
     };
-  }, [onBounds, onPoint, onLocation]);
+  }, []);
 
   useEffect(() => {
     const layer = layers.current.radius;
