@@ -1,6 +1,6 @@
 # Contrato da API — versão 1
 
-Contrato definido na etapa 0 para orientar a implementação do Express e a integração do React. `GET /api/health` e os erros gerais já estão implementados na branch `etapa-0`; as demais rotas serão implementadas gradualmente nas etapas seguintes. Exemplos usam os locais fornecidos pelo usuário e horários ilustrativos.
+Contrato definido na etapa 0 para orientar a implementação do Express e a integração do React. `GET /api/health`, universidades e CRUD espacial de paradas estão implementados até a branch `etapa-2`; geocodificação, proximidade e ônibus serão implementados nas etapas seguintes. Exemplos usam os locais fornecidos pelo usuário e horários ilustrativos.
 
 ## Convenções gerais
 
@@ -318,6 +318,6 @@ Resposta 200: array de objetos completos de ônibus, como na resposta da atualiz
 
 ## Dados para integração
 
-Os oito locais, IDs estáveis de demonstração e cenários estão em [dados-demonstracao.md](dados-demonstracao.md) e [dados-demonstracao.json](dados-demonstracao.json). O JSON descreve entradas para os futuros seeds e mocks: não é uma resposta completa da API, pois não contém datas geradas pelo servidor. Usar os exemplos deste contrato ao simular respostas no React.
+Os oito locais, IDs estáveis de demonstração e cenários estão em [dados-demonstracao.md](dados-demonstracao.md) e [dados-demonstracao.json](dados-demonstracao.json). O JSON alimenta a carga opcional `npm run db:seed` e os mocks: não é uma resposta completa da API, pois não contém datas geradas pelo servidor. Usar os exemplos deste contrato ao simular respostas no React.
 
-Mudanças no contrato devem atualizar este documento e a tarefa correspondente antes da integração. A configuração do React e a implementação das rotas de domínio continuam nas próximas etapas.
+Mudanças no contrato devem atualizar este documento e a tarefa correspondente antes da integração. A configuração do React permanece com Millena Kelly; as rotas das etapas 3 a 5 continuam pendentes.

@@ -8,11 +8,11 @@ O React será configurado por Millena Kelly, responsável pelo frontend. O Docke
 
 ## Estado atual
 
-Branch `etapa-1`: base Express/Sequelize, migrações, saúde, erros JSON e infraestrutura Docker implementados. Os contratos, os dados e a base do backend vieram da etapa 0. A etapa 1 acrescenta uma rotina isolada de validação Docker/PostGIS e sua execução automática no GitHub Actions. CRUD e consultas de paradas começam na etapa 2.
+Branch `etapa-2`: universidades (cadastro/listagem), CRUD de paradas, validações e filtro obrigatório por área visível implementados. As paradas usam `geometry(Point, 4326)`, chave estrangeira e índice GiST; a filtragem ocorre no PostGIS e inclui as bordas. O frontend continua sob responsabilidade de Millena Kelly e ainda não está presente em `apps/frontend/`.
 
-Cada próxima etapa terá sua própria branch `etapa-N`, mantendo a implementação gradual e os critérios de aceite do plano. O React continua sob responsabilidade de Millena Kelly. `aplicacao-poi/` permanece como referência temporária, independente da execução do backend novo.
+A base Docker/PostGIS da etapa 1 está validada. A etapa 2 mantém os contratos da dupla e acrescenta uma carga opcional com os oito locais fornecidos. Geocodificação, proximidade e ônibus pertencem às próximas etapas. `aplicacao-poi/` permanece como referência temporária, independente da execução.
 
-O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. Os 15 testes HTTP/configuração/inicialização passaram e o Compose foi validado. A validação real de Docker/PostGIS passou: build do backend, teste de integração, saúde e preservação das migrações ao recriar os containers. A parte backend/infraestrutura da etapa 1 está validada; o React e o build completo continuam pendentes da entrega do frontend.
+O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. A parte frontend da etapa 2 aguarda integração por Millena Kelly; o build completo com React depende dessa entrega.
 
 ## Executar com Docker
 
@@ -61,7 +61,7 @@ npm --prefix apps/backend test
 docker compose --env-file .env.example config --quiet
 ```
 
-Os testes HTTP usam uma conexão de banco simulada para verificar saúde, indisponibilidade, erros e arquivos estáticos. Também verificam configuração e falha de inicialização com banco inacessível. Eles não substituem a integração real.
+Os testes HTTP básicos usam uma conexão de banco simulada para verificar saúde, indisponibilidade, erros e arquivos estáticos. Também verificam configuração e falha de inicialização com banco inacessível. Eles não substituem a integração real.
 
 Com o `.env` configurado e o PostGIS de desenvolvimento disponível, executar:
 
@@ -69,14 +69,28 @@ Com o `.env` configurado e o PostGIS de desenvolvimento disponível, executar:
 npm --prefix apps/backend run test:integration
 ```
 
-Esse teste aplica migrações no banco configurado, confere execuções concorrentes e repetidas e testa a saúde com PostGIS real. Use um banco de desenvolvimento dedicado.
+A integração aplica migrações e carrega os oito locais de demonstração no banco configurado. Confere migrações concorrentes/repetidas, saúde, CRUD, validações, SRID, índice espacial, bordas e filtros de Cajazeiras/Sousa. Use um banco de desenvolvimento dedicado.
 
-## Validar a etapa 1 em ambiente isolado
+## Carregar os dados de demonstração
+
+A carga é opcional e não roda ao iniciar o servidor. Ela usa o JSON de `docs/dados-demonstracao.json`, em uma transação, e cria oito universidades/campi e oito paradas com IDs estáveis. Repetir o comando preserva registros existentes e edições, sem duplicar IDs. Ônibus serão acrescentados na etapa 5.
+
+Com o Compose iniciado:
+
+```bash
+docker compose exec app npm run db:seed
+curl 'http://localhost:3000/api/universidades'
+curl 'http://localhost:3000/api/paradas?bbox=-38.58,-6.91,-38.53,-6.86'
+```
+
+Fora do Docker, com `.env` configurado: `npm --prefix apps/backend run db:seed`. O comando aplica as migrações pendentes antes da carga. A listagem de paradas exige `bbox`; a consulta de um UUID específico usa `/api/paradas/:id`. Os formatos de POST, PUT e DELETE estão no contrato da API.
+
+## Validar o backend em ambiente isolado
 
 Com Docker e Compose disponíveis, executar na raiz:
 
 ```bash
-bash scripts/validate-stage-1.sh
+bash scripts/validate-backend.sh
 ```
 
 A rotina compila o alvo `backend`, inicia PostGIS, aguarda a saúde, executa o teste de integração real e recria os containers para conferir a preservação do histórico de migrações. Também verifica saúde, 404 JSON da API e execução sem React dentro da imagem. Utiliza um projeto Compose exclusivo e as credenciais locais de `.env.example`; não precisa criar `.env`.
@@ -84,7 +98,7 @@ A rotina compila o alvo `backend`, inicia PostGIS, aguarda a saúde, executa o t
 As portas padrão desse teste são 33000 (API) e 55432 (PostgreSQL). Se estiverem ocupadas:
 
 ```bash
-API_PORT=33001 PG_PORT=55433 bash scripts/validate-stage-1.sh
+API_PORT=33001 PG_PORT=55433 bash scripts/validate-backend.sh
 ```
 
 Ao terminar, inclusive em caso de falha, remove os containers e o volume exclusivos do teste. Os dados desse teste são descartáveis. O ambiente de desenvolvimento iniciado com os comandos anteriores usa outro projeto e volume.
@@ -110,4 +124,4 @@ O alvo `production` compila o React e copia `dist/` para `apps/backend/public/`.
 - [Tarefas da dupla e links das issues](docs/tarefas.md)
 - [Pendência de conferência do enunciado — issue #13](https://github.com/jppgmx/bdii-proj1/issues/13)
 
-As coordenadas representam locais reais informados pelo usuário em Cajazeiras e Sousa. Os pontos de demonstração não confirmam paradas oficiais de ônibus. A carga desses dados será implementada com o CRUD, na etapa 2.
+As coordenadas representam locais reais informados pelo usuário em Cajazeiras e Sousa. Os pontos de demonstração não confirmam paradas oficiais de ônibus. A carga opcional desses dados está disponível pelo comando `db:seed`.

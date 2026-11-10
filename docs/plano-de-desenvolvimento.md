@@ -182,11 +182,11 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **João Paulo**
 
-- [ ] Criar migrações e modelos de universidade e parada, adaptando os campos do POI e explicitando SRID 4326.
-- [ ] Implementar cadastro e listagem simples de universidades.
-- [ ] Adaptar o CRUD de `/api/pois` para `/api/paradas`, com validação e respostas 201, 200, 204, 400 e 404 conforme o contrato.
-- [ ] Implementar desde a listagem inicial o filtro obrigatório por `bbox`, com consulta PostGIS e índice espacial.
-- [ ] Verificar persistência e inclusão/exclusão de pontos dentro e fora do retângulo consultado.
+- [x] Criar migrações e modelos de universidade e parada, adaptando os campos do POI e explicitando SRID 4326.
+- [x] Implementar cadastro e listagem simples de universidades.
+- [x] Adaptar o CRUD de `/api/pois` para `/api/paradas`, com validação e respostas 201, 200, 204, 400 e 404 conforme o contrato.
+- [x] Implementar desde a listagem inicial o filtro obrigatório por `bbox`, com consulta PostGIS e índice espacial.
+- [x] Verificar persistência e inclusão/exclusão de pontos dentro e fora do retângulo consultado.
 
 **Millena Kelly**
 
@@ -200,6 +200,8 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 - [ ] Mostrar carregamento, erros e ausência de resultados; atualizar o mapa após alterações.
 
 **Concluída quando:** cadastrar, consultar, editar, reposicionar e excluir paradas funciona pela interface e persiste após recarregar. A API retorna apenas os pontos da área solicitada.
+
+**Verificação do backend na `etapa-2`:** 18 testes locais e dois testes de integração com PostGIS real aprovados. Implementados universidades, CRUD persistente, erros por campo e validação estrita de GeoJSON/UUID/bbox, índice GiST e filtro inclusivo no banco. A carga opcional preserva os oito IDs de universidades e paradas ao repetir. A integração verifica cinco locais em Cajazeiras e oito na área ampliada, além de edição, exclusão e pontos nas bordas. T03 está concluída; T04 e o aceite pela interface permanecem com Millena Kelly.
 
 ### Etapa 3 — Adaptar a busca de localidades
 
