@@ -61,3 +61,39 @@ input, select, button {
     min-height: 22rem;
   }
 }
+
+.map {
+  height: min(70vh, 46rem);
+  margin-bottom: 0.5rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.field-error {
+  color: #a1251b;
+}
+
+textarea {
+  min-width: 0;
+  padding: 0.4rem;
+  font: inherit;
+}
+
+.draft-pin {
+  filter: hue-rotate(175deg) saturate(2);
+}
+
+.stop-list ul {
+  padding-left: 1rem;
+}
+
+.stop-list li {
+  margin-bottom: 0.5rem;
+}
+
+.stop-list small {
+  display: block;
+}

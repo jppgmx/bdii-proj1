@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import MapView from './MapView.jsx';
+import { api, latestRequest, pointToLatLng } from './paradas.js';
+import { UniversityForm, StopForm } from './Forms.jsx';
 
 const connectionError = 'Não foi possível conectar à API.';
 const invalidResponse = 'A API retornou uma resposta de saúde inesperada.';
@@ -46,6 +48,64 @@ export default function App() {
     return () => controller.abort();
   }, []);
 
+  const [universities, setUniversities] = useState([]);
+  const [universityStatus, setUniversityStatus] = useState({ loading: true });
+  const [stopList, setStopList] = useState({ loading: true, items: [] });
+  const [selected, setSelected] = useState(null);
+  const [point, setPoint] = useState(null);
+  const [formKey, setFormKey] = useState(0);
+  const [newUniversity, setNewUniversity] = useState('');
+  const [busy, setBusy] = useState(false);
+  const bounds = useRef(null);
+
+  const [stopRequests] = useState(() => latestRequest(
+    (signal, bbox) => api(`/api/paradas?bbox=${bbox}`, { signal }),
+    (items) => setStopList({ items }),
+    (error) => setStopList({ items: [], error: error.message }),
+  ));
+
+  const loadStops = useCallback((bbox) => {
+    bounds.current = bbox;
+    setStopList({ loading: true, items: [] });
+    stopRequests.run(bbox);
+  }, [stopRequests]);
+
+  useEffect(() => () => stopRequests.cancel(), [stopRequests]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    api('/api/universidades', { signal: controller.signal }).then((items) => {
+      if (controller.signal.aborted) return;
+      setUniversities(items);
+      setUniversityStatus({});
+    }).catch((error) => {
+      if (!controller.signal.aborted) setUniversityStatus({ error: error.message });
+    });
+    return () => controller.abort();
+  }, []);
+
+  const editStop = useCallback((stop) => {
+    if (busy) return;
+    setSelected(stop);
+    setPoint(pointToLatLng(stop.localizacao));
+    setFormKey((key) => key + 1);
+  }, [busy]);
+
+  function resetStop() {
+    setSelected(null);
+    setPoint(null);
+    setFormKey((key) => key + 1);
+  }
+
+  function refreshStops() {
+    if (bounds.current) loadStops(bounds.current);
+  }
+
+  function addUniversity(university) {
+    setUniversities((items) => [...items, university].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
+    setNewUniversity(university.id);
+  }
+
   return (
     <main>
       <header>
@@ -53,31 +113,37 @@ export default function App() {
         <p>Cajazeiras e Sousa · Paraíba</p>
       </header>
       <div className="layout">
-        <MapView />
+        <MapView stops={stopList.items} draft={point} onBounds={loadStops} onPoint={setPoint} onEdit={editStop} />
         <aside aria-labelledby="panel-title">
           <h2 id="panel-title">Painel</h2>
           <p role="status">{health}</p>
-          <p>Os formulários serão habilitados nas próximas etapas.</p>
-          <form>
-            <fieldset disabled>
-              <legend>Buscar localidade</legend>
-              <label htmlFor="localidade">Nome da localidade</label>
-              <input id="localidade" type="search" />
-              <button type="button">Buscar</button>
-            </fieldset>
-          </form>
-          <form>
-            <fieldset disabled>
-              <legend>Cadastrar parada</legend>
-              <label htmlFor="parada">Nome da parada</label>
-              <input id="parada" />
-              <label htmlFor="universidade">Universidade</label>
-              <select id="universidade">
-                <option>Selecione uma universidade</option>
-              </select>
-              <button type="button">Salvar</button>
-            </fieldset>
-          </form>
+          {universityStatus.loading && <p role="status">Carregando universidades…</p>}
+          {universityStatus.error && <p role="alert">{universityStatus.error}</p>}
+          <UniversityForm onCreated={addUniversity} disabled={universityStatus.loading} />
+          <StopForm key={formKey} stop={selected} universities={universities} newUniversity={newUniversity}
+            point={point} busy={busy} setBusy={setBusy} onReset={resetStop} onSaved={refreshStops} />
+          <section className="stop-list" aria-labelledby="stop-list-title">
+            <h3 id="stop-list-title">Paradas na área visível</h3>
+            {stopList.loading && <p role="status">Carregando paradas…</p>}
+            {stopList.error && (
+              <div role="alert">
+                <p>{stopList.error}</p>
+                <button type="button" onClick={refreshStops}>Tentar novamente</button>
+              </div>
+            )}
+            {!stopList.loading && !stopList.error && stopList.items.length === 0 &&
+              <p role="status">Nenhuma parada na área visível.</p>}
+            <ul>
+              {stopList.items.map((stop) => (
+                <li key={stop.id}>
+                  <button type="button" disabled={busy} onClick={() => editStop(stop)}>{stop.nome}</button>
+                  <small>Atualizada em <time dateTime={stop.updatedAt}>
+                    {new Date(stop.updatedAt).toLocaleString('pt-BR')}
+                  </time></small>
+                </li>
+              ))}
+            </ul>
+          </section>
         </aside>
       </div>
     </main>
