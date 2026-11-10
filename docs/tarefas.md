@@ -18,7 +18,7 @@ Backlog definido na etapa 0 para o repositório `jppgmx/bdii-proj1`. Cada seçã
 | T12 | [#12](https://github.com/jppgmx/bdii-proj1/issues/12) | 7 — Demonstração e entrega |
 | T13 | [#13](https://github.com/jppgmx/bdii-proj1/issues/13) | 0 — Conferência do enunciado |
 
-O frontend permanece pendente; T03 (universidades e CRUD espacial de paradas) está implementada e validada com PostGIS real na `etapa-2`; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
+T05 (geocodificação Nominatim) está implementada e validada no backend da `etapa-3`; o frontend permanece com Millena Kelly; T03 (universidades e CRUD espacial de paradas) está implementada e validada com PostGIS real na `etapa-2`; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
 
 ## T01 — [Etapa 1][Backend] Preparar Express, PostGIS e Docker
 
@@ -88,10 +88,10 @@ O frontend permanece pendente; T03 (universidades e CRUD espacial de paradas) es
 
 **Dependências:** T03.
 
-- [ ] Escolher provedor e conferir sua política vigente antes da integração.
-- [ ] Implementar `/api/geocodificacao`, validação de `q` e até cinco resultados normalizados.
-- [ ] Configurar identificação, atribuição, frequência, cache e troca de provedor conforme o serviço escolhido.
-- [ ] Tratar vazio, limites, timeout e indisponibilidade com os erros contratados.
+- [x] Escolher provedor e conferir sua política vigente antes da integração.
+- [x] Implementar `/api/geocodificacao`, validação de `q` e até cinco resultados normalizados.
+- [x] Configurar identificação, atribuição, frequência, cache e troca de provedor conforme o serviço escolhido.
+- [x] Tratar vazio, limites, timeout e indisponibilidade com os erros contratados.
 
 **Aceite:** buscas de locais de Cajazeiras e Sousa retornam nome e ponto estáveis para o frontend; falhas não viram lista vazia.
 

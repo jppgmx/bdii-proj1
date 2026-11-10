@@ -1,6 +1,6 @@
 # Contrato da API — versão 1
 
-Contrato definido na etapa 0 para orientar a implementação do Express e a integração do React. `GET /api/health`, universidades e CRUD espacial de paradas estão implementados até a branch `etapa-2`; geocodificação, proximidade e ônibus serão implementados nas etapas seguintes. Exemplos usam os locais fornecidos pelo usuário e horários ilustrativos.
+Contrato definido na etapa 0 para orientar a implementação do Express e a integração do React. `GET /api/health`, universidades e CRUD espacial de paradas estão implementados até a branch `etapa-2`; geocodificação está implementada na `etapa-3`, e proximidade/ônibus continuam nas etapas seguintes. Exemplos usam os locais fornecidos pelo usuário e horários ilustrativos.
 
 ## Convenções gerais
 
@@ -204,7 +204,7 @@ Resposta 200, com até cinco resultados normalizados. O conteúdo depende do pro
 ]
 ```
 
-Sem resultados retorna `[]`. Query inválida retorna 400. O frontend mantém a atribuição do provedor configurado, definida no [contrato de integração](integracao.md). Retornos 429, 502 e 504 seguem a tabela de erros; uma falha não deve ser convertida em lista vazia. O provedor, cache, identificação e controle de frequência serão implementados na etapa 3, após conferir a política do serviço escolhido.
+Sem resultados retorna `[]`. Query inválida retorna 400. O frontend mantém a atribuição do provedor configurado, definida no [contrato de integração](integracao.md). Retornos 429, 502 e 504 seguem a tabela de erros; uma falha não deve ser convertida em lista vazia. Na etapa 3 foi adotado Nominatim com `format=jsonv2`, `limit=5` e idioma `pt-BR`, sem filtro de área visível. O backend envia User-Agent de identificação e devolve o link de licença no header `Link`. Cache persistente por 24 horas, com até 1000 consultas, e controle global de uma chamada por segundo ficam no PostgreSQL. Consultas concorrentes sem cache e intervalo ativo retornam 429; um limite recebido do provedor também retorna 429 e bloqueia novas chamadas conforme `Retry-After` (até 24 horas; 60 segundos se ausente). Falhas não são armazenadas como resultados vazios. O endpoint pode ser trocado por configuração para outro serviço compatível com Nominatim.
 
 ## Proximidade — etapa 4
 
@@ -320,4 +320,4 @@ Resposta 200: array de objetos completos de ônibus, como na resposta da atualiz
 
 Os oito locais, IDs estáveis de demonstração e cenários estão em [dados-demonstracao.md](dados-demonstracao.md) e [dados-demonstracao.json](dados-demonstracao.json). O JSON alimenta a carga opcional `npm run db:seed` e os mocks: não é uma resposta completa da API, pois não contém datas geradas pelo servidor. Usar os exemplos deste contrato ao simular respostas no React.
 
-Mudanças no contrato devem atualizar este documento e a tarefa correspondente antes da integração. A configuração do React permanece com Millena Kelly; as rotas das etapas 3 a 5 continuam pendentes.
+Mudanças no contrato devem atualizar este documento e a tarefa correspondente antes da integração. A configuração do React permanece com Millena Kelly; geocodificação já está implementada no backend e as rotas das etapas 4 e 5 continuam pendentes.

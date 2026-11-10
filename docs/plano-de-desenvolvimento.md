@@ -207,9 +207,9 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 
 **João Paulo**
 
-- [ ] Implementar `/api/geocodificacao` com provedor configurável e resposta simples de nome e coordenadas.
-- [ ] Tratar busca vazia, ausência de resultados, timeout e falhas do provedor.
-- [ ] Se usar o Nominatim público, conferir e atender à política vigente de identificação, atribuição, frequência e cache antes da publicação.
+- [x] Implementar `/api/geocodificacao` com provedor configurável e resposta simples de nome e coordenadas.
+- [x] Tratar busca vazia, ausência de resultados, timeout e falhas do provedor.
+- [x] Se usar o Nominatim público, conferir e atender à política vigente de identificação, atribuição, frequência e cache antes da publicação.
 
 **Millena Kelly**
 
@@ -218,6 +218,8 @@ Os oito locais reais fornecidos pelo usuário, incluindo as unidades de Sousa e 
 - [ ] Permitir ajuste manual do ponto antes de salvar a parada e exibir falhas de busca.
 
 **Concluída quando:** é possível procurar um local de Cajazeiras, escolher o resultado, ajustar e salvar. Conferir a [política do Nominatim](https://operations.osmfoundation.org/policies/nominatim/) caso esse seja o provedor adotado.
+
+**Verificação do backend na `etapa-3`:** 20 testes locais e três testes de integração com PostGIS real aprovados. O provedor é simulado nos testes automáticos, incluindo resultados, vazio, resposta inválida, timeout, falha de rede, limites e concorrência entre instâncias. Cache e intervalo persistem no PostgreSQL, com URL e identificação configuráveis. Verificação manual com Nominatim real aprovada: cinco resultados para Cajazeiras e dois para Sousa, com chamadas espaçadas após recriar os containers. T05 implementada; T06 e o aceite pela interface permanecem com Millena Kelly.
 
 ### Etapa 4 — Acrescentar busca por proximidade
 
