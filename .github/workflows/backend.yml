@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  etapa-1:
+  backend:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -22,5 +22,5 @@ jobs:
         run: npm --prefix apps/backend ci
       - name: Testar HTTP, configuração e inicialização
         run: npm --prefix apps/backend test
-      - name: Validar imagem backend e PostGIS real
-        run: bash scripts/validate-stage-1.sh
+      - name: Validar imagem, PostGIS e CRUD espacial
+        run: bash scripts/validate-backend.sh
