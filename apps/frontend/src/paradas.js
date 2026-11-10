@@ -30,6 +30,8 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   if (!response.ok) {
     const error = new Error(data?.error?.message ?? `Falha na API (HTTP ${response.status}).`);
     error.fields = data?.error?.fields;
+    error.status = response.status;
+    error.retryAfter = response.headers.get('Retry-After');
     throw error;
   }
   if (data === null) throw new Error('A API retornou uma resposta inesperada.');

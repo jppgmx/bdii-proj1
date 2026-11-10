@@ -29,7 +29,7 @@ const draftIcon = icon({
   className: 'draft-pin',
 });
 
-export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
+export default function MapView({ stops, draft, center, onBounds, onPoint, onEdit }) {
   const container = useRef(null);
   const layers = useRef(null);
   const [locationStatus, setLocationStatus] = useState('Buscando sua localização…');
@@ -43,6 +43,7 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
     }).addTo(view);
 
     layers.current = {
+      view,
       stops: layerGroup().addTo(view),
       draft: layerGroup().addTo(view),
     };
@@ -68,8 +69,12 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
         const point = [coords.latitude, coords.longitude];
         circleMarker(point, { radius: 9, color: '#fff', fillColor: '#0759b5', fillOpacity: 1 })
           .bindTooltip('Sua localização').addTo(view);
-        view.setView(point, initialZoom);
-        setLocationStatus('Mapa centralizado na sua localização.');
+        if (layers.current.centeredOnResult) {
+          setLocationStatus('Sua localização está marcada no mapa.');
+        } else {
+          view.setView(point, initialZoom);
+          setLocationStatus('Mapa centralizado na sua localização.');
+        }
       }, ({ code }) => fail(locationErrors[code] ?? locationErrors[2]), {
         maximumAge: maxAge,
         timeout: 10_000,
@@ -83,6 +88,13 @@ export default function MapView({ stops, draft, onBounds, onPoint, onEdit }) {
       view.remove();
     };
   }, [onBounds, onPoint]);
+
+  useEffect(() => {
+    if (!center) return;
+    const { view } = layers.current;
+    layers.current.centeredOnResult = true;
+    view.setView(center, Math.max(view.getZoom(), initialZoom));
+  }, [center]);
 
   useEffect(() => {
     const layer = layers.current.stops;

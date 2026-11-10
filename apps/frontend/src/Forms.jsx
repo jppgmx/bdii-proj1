@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from './paradas.js';
+import { locationSearch } from './geocodificacao.js';
 
 const requiredName = (name, limit) => {
   if (!name) return 'Informe o nome.';
@@ -19,6 +20,81 @@ function Field({ id, label, error, children }) {
 
 function fieldProps(id, error) {
   return { id, 'aria-invalid': Boolean(error), 'aria-describedby': error ? `${id}-error` : undefined };
+}
+
+const searchMessages = {
+  429: 'O limite de buscas de localidades foi atingido.',
+  502: 'O serviço de busca de localidades está indisponível.',
+  504: 'O serviço de busca de localidades excedeu o tempo de espera.',
+};
+
+export function LocationSearch({ disabled, onSelect, onCancel }) {
+  const [result, setResult] = useState(null);
+  const [fieldError, setFieldError] = useState('');
+  const [blockedUntil, setBlockedUntil] = useState(0);
+  const [search] = useState(() => locationSearch(
+    (items) => setResult({ items }),
+    (error, deadline) => {
+      setResult({ error: searchMessages[error.status] ?? error.message });
+      if (error.status === 400) setFieldError(error.fields?.q ?? '');
+      if (error.status === 429 && deadline > Date.now()) setBlockedUntil(deadline);
+    },
+  ));
+
+  useEffect(() => () => search.cancel(), [search]);
+
+  useEffect(() => {
+    if (!blockedUntil) return;
+    const timer = setTimeout(() => setBlockedUntil(0), Math.max(0, blockedUntil - Date.now()));
+    return () => clearTimeout(timer);
+  }, [blockedUntil]);
+
+  function submit(event) {
+    event.preventDefault();
+    if (result?.loading || blockedUntil) return;
+    const query = new FormData(event.currentTarget).get('q').trim();
+    if (query.length < 3 || query.length > 200) {
+      setFieldError('Informe de 3 a 200 caracteres para pesquisar.');
+      setResult(null);
+      return;
+    }
+    setFieldError('');
+    setResult({ loading: true });
+    search.run(query);
+  }
+
+  function cancel() {
+    search.cancel();
+    setResult(null);
+    setFieldError('');
+    onCancel();
+  }
+
+  return (
+    <form onSubmit={submit}>
+      <fieldset>
+        <legend>Buscar localidade</legend>
+        <Field id="location-query" label="Localidade" error={fieldError}>
+          <input name="q" type="search" aria-required="true" {...fieldProps('location-query', fieldError)} />
+        </Field>
+        <button disabled={result?.loading || Boolean(blockedUntil)}>Pesquisar</button>
+        <button type="button" disabled={disabled} onClick={cancel}>Cancelar busca</button>
+        {result?.loading && <p role="status">Buscando localidades…</p>}
+        {result?.error && <p role="alert">{result.error}</p>}
+        {blockedUntil > 0 && <p role="status">Aguarde antes de pesquisar novamente.</p>}
+        {result?.items?.length === 0 && <p role="status">Nenhuma localidade encontrada.</p>}
+        {result?.items?.length > 0 && (
+          <ul>
+            {result.items.map(({ nome, localizacao }, index) => (
+              <li key={index}>
+                <button type="button" disabled={disabled} onClick={() => onSelect(localizacao)}>{nome}</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </fieldset>
+    </form>
+  );
 }
 
 export function UniversityForm({ onCreated, disabled }) {
