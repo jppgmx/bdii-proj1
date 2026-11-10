@@ -1,6 +1,6 @@
 # Contrato da API — versão 1
 
-Contrato definido na etapa 0 para orientar a implementação do Express e a integração do React. `GET /api/health`, universidades e CRUD espacial de paradas estão implementados até a branch `etapa-2`; geocodificação está implementada na `etapa-3`, proximidade está implementada na `etapa-4`, e ônibus continuam na etapa 5. Exemplos usam os locais fornecidos pelo usuário e horários ilustrativos.
+Contrato definido na etapa 0 para orientar a implementação do Express e a integração do React. `GET /api/health`, universidades e CRUD espacial de paradas estão implementados até a branch `etapa-2`; geocodificação está implementada na `etapa-3`, proximidade está implementada na `etapa-4`, e ônibus/posição manual estão implementados na `etapa-5`. Exemplos usam os locais fornecidos pelo usuário e horários ilustrativos.
 
 ## Convenções gerais
 
@@ -320,4 +320,4 @@ Resposta 200: array de objetos completos de ônibus, como na resposta da atualiz
 
 Os oito locais, IDs estáveis de demonstração e cenários estão em [dados-demonstracao.md](dados-demonstracao.md) e [dados-demonstracao.json](dados-demonstracao.json). O JSON alimenta a carga opcional `npm run db:seed` e os mocks: não é uma resposta completa da API, pois não contém datas geradas pelo servidor. Usar os exemplos deste contrato ao simular respostas no React.
 
-Mudanças no contrato devem atualizar este documento e a tarefa correspondente antes da integração. A configuração do React permanece com Millena Kelly; geocodificação já está implementada no backend e proximidade está implementada no backend e as rotas da etapa 5 continuam pendentes.
+Mudanças no contrato devem atualizar este documento e a tarefa correspondente antes da integração. A configuração do React permanece com Millena Kelly; geocodificação já está implementada no backend e proximidade está implementada no backend e as rotas de ônibus/posição manual também estão implementadas; a integração visual permanece com Millena Kelly.

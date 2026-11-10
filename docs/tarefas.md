@@ -18,7 +18,7 @@ Backlog definido na etapa 0 para o repositório `jppgmx/bdii-proj1`. Cada seçã
 | T12 | [#12](https://github.com/jppgmx/bdii-proj1/issues/12) | 7 — Demonstração e entrega |
 | T13 | [#13](https://github.com/jppgmx/bdii-proj1/issues/13) | 0 — Conferência do enunciado |
 
-T07 (proximidade em metros) está implementada no backend da `etapa-4`; T05 (geocodificação Nominatim) está implementada e validada na `etapa-3`; o frontend permanece com Millena Kelly; T03 (universidades e CRUD espacial de paradas) está implementada e validada com PostGIS real na `etapa-2`; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
+T09 (ônibus e posição manual) está implementada e validada no backend da `etapa-5`; T07 (proximidade em metros) está implementada no backend da `etapa-4`; T05 (geocodificação Nominatim) está implementada e validada na `etapa-3`; o frontend permanece com Millena Kelly; T03 (universidades e CRUD espacial de paradas) está implementada e validada com PostGIS real na `etapa-2`; T01 tem a base implementada na `etapa-0` e a validação automatizada preparada na `etapa-1`, validada localmente com PostGIS real e Docker. T01 está concluída; T02 continua pendente com Millena Kelly. O [contrato da API](contrato-api.md), o [contrato de integração](integracao.md) e os [dados de demonstração](dados-demonstracao.md) são a base da implementação. Executar uma etapa por vez, em sua branch `etapa-N`.
 
 ## T01 — [Etapa 1][Backend] Preparar Express, PostGIS e Docker
 
@@ -141,11 +141,11 @@ T07 (proximidade em metros) está implementada no backend da `etapa-4`; T05 (geo
 
 **Dependências:** T03; executar após a etapa 4.
 
-- [ ] Criar modelo/migração com universidade, posição opcional, horário e índice espacial.
-- [ ] Implementar cadastro, listagem do painel e listagem espacial por `bbox`.
-- [ ] Salvar ponto e horário do servidor juntos na rota de posição e retornar estado persistido.
-- [ ] Acrescentar `DEMO-01` ao seed, inicialmente sem posição, sem duplicá-lo em novas cargas.
-- [ ] Verificar listagens sem posição e persistência da atualização.
+- [x] Criar modelo/migração com universidade, posição opcional, horário e índice espacial.
+- [x] Implementar cadastro, listagem do painel e listagem espacial por `bbox`.
+- [x] Salvar ponto e horário do servidor juntos na rota de posição e retornar estado persistido.
+- [x] Acrescentar `DEMO-01` ao seed, inicialmente sem posição, sem duplicá-lo em novas cargas.
+- [x] Verificar listagens sem posição e persistência da atualização.
 
 **Aceite:** o painel inclui ônibus sem posição, o mapa inclui somente posições no retângulo, e uma atualização persiste ponto e horário.
 

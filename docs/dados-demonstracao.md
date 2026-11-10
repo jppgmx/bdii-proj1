@@ -27,7 +27,7 @@ São oito registros no recurso `universidades`, um para cada instituição/campu
 - IDs de pontos: `20000000-0000-4000-8000-000000000001` a `20000000-0000-4000-8000-000000000008`, vinculados às respectivas universidades.
 - Ônibus `DEMO-01`: `30000000-0000-4000-8000-000000000001`, vinculado à unidade 1.
 - Pontos estão em GeoJSON, com `[longitude, latitude]`; não inverter novamente ao salvar no PostGIS.
-- O arquivo alimenta a carga opcional `npm run db:seed` e os mocks. Na etapa 2, a carga das universidades e paradas foi validada com PostGIS real, incluindo repetição sem duplicar IDs. O ônibus será carregado na etapa 5.
+- O arquivo alimenta a carga opcional `npm run db:seed` e os mocks. Na etapa 2, a carga das universidades e paradas foi validada com PostGIS real, incluindo repetição sem duplicar IDs. A etapa 5 inclui `DEMO-01` na carga, inicialmente sem posição; repetir a carga preserva ponto e horário já salvos.
 - Seeds poderão preservar os IDs estáveis para evitar duplicações ao repetir a carga; chamadas públicas de criação devem omitir os IDs.
 - Datas serão geradas na carga ou simuladas no mock conforme o [contrato da API](contrato-api.md). O ônibus começa com posição e horário nulos.
 
