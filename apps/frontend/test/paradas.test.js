@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { describe, test } from 'node:test';
 import { bboxFromBounds, formatDistance, latestRequest, stopsUrl } from '../src/paradas.js';
 
 const position = { lat: -6.889266, lng: -38.545341 };
@@ -36,33 +36,97 @@ test('exibe distância zero e arredonda a distância apenas para exibição', ()
   assert.equal(formatDistance(500.6), '501 m');
 });
 
-test('descarta sucesso e erro atrasados ao mudar a área e limpar o filtro', async () => {
+function requestFixture() {
+  const requestId = { current: 0 };
   const pending = [];
   const results = [];
   const errors = [];
   const requests = latestRequest(
-    { current: 0 },
+    requestId,
     (signal, url) => new Promise((resolve, reject) => pending.push({ signal, url, resolve, reject })),
     (items) => results.push(items),
     (error) => errors.push(error),
   );
-  const filter = { position, radius: 500 };
-  const nextBbox = '-38.57,-6.9,-38.52,-6.85';
-  const first = requests.run(stopsUrl(bbox, filter));
-  const second = requests.run(stopsUrl(nextBbox, filter));
-  const cleared = requests.run(stopsUrl(nextBbox, null));
+  return { requestId, requests, pending, results, errors };
+}
 
-  assert.equal(pending[0].signal.aborted, true);
-  assert.equal(pending[1].signal.aborted, true);
-  assert.equal(pending[2].signal.aborted, false);
-  assert.equal(pending[2].url, `/api/paradas?bbox=${nextBbox}`);
+describe('latestRequest', () => {
+  const nearby = stopsUrl(bbox, { position, radius: 500 });
+  const visible = stopsUrl(bbox, null);
 
-  pending[2].resolve([{ id: 'visível' }]);
-  await cleared;
-  pending[0].resolve([{ id: 'antiga', distancia_m: 0 }]);
-  pending[1].reject(new Error('falha antiga'));
-  await Promise.all([first, second]);
+  test('descarta sucesso atrasado de uma consulta com requestId anterior', async () => {
+    const { requestId, requests, pending, results } = requestFixture();
+    const old = requests.run(nearby);
+    const current = requests.run(visible);
 
-  assert.deepEqual(results, [[{ id: 'visível' }]]);
-  assert.deepEqual(errors, []);
+    assert.equal(requestId.current, 2);
+    assert.equal(pending[0].signal.aborted, true);
+    pending[1].resolve([{ id: 'visível' }]);
+    await current;
+    pending[0].resolve([{ id: 'antiga', distancia_m: 0 }]);
+    await old;
+
+    assert.deepEqual(results, [[{ id: 'visível' }]]);
+  });
+
+  test('descarta erro atrasado e entrega o erro do requestId atual', async () => {
+    const { requestId, requests, pending, errors } = requestFixture();
+    const old = requests.run(nearby);
+    const current = requests.run(visible);
+    const currentError = new Error('falha atual');
+
+    assert.equal(requestId.current, 2);
+    pending[1].reject(currentError);
+    await current;
+    pending[0].reject(new Error('falha antiga'));
+    await old;
+
+    assert.deepEqual(errors, [currentError]);
+  });
+
+  test('limpar incrementa requestId e invalida o sucesso anterior antes da nova consulta', async () => {
+    const { requestId, requests, pending, results } = requestFixture();
+    const old = requests.run(nearby);
+    const oldId = requestId.current;
+
+    requests.cancel();
+    assert.equal(requestId.current, oldId + 1);
+    pending[0].resolve([{ id: 'antiga', distancia_m: 0 }]);
+    await old;
+    assert.deepEqual(results, []);
+
+    const cleared = requests.run(visible);
+    assert.equal(requestId.current, oldId + 2);
+    assert.equal(pending[1].url, `/api/paradas?bbox=${bbox}`);
+    pending[1].resolve([{ id: 'visível' }]);
+    await cleared;
+    assert.deepEqual(results, [[{ id: 'visível' }]]);
+  });
+
+  test('a mesma chave dispara uma única requisição', async () => {
+    const { requestId, requests, pending } = requestFixture();
+    const first = requests.run(nearby);
+    await requests.run(nearby);
+
+    assert.equal(pending[0].signal.aborted, false);
+    pending[0].resolve([]);
+    await first;
+    await requests.run(nearby);
+
+    assert.equal(pending.length, 1);
+    assert.equal(requestId.current, 1);
+  });
+
+  test('uma atualização explícita permite consultar novamente a mesma chave', async () => {
+    const { requests, pending } = requestFixture();
+    const first = requests.run(nearby);
+    pending[0].resolve([]);
+    await first;
+
+    requests.cancel();
+    const refreshed = requests.run(nearby);
+    assert.equal(pending.length, 2);
+    pending[1].resolve([]);
+    await refreshed;
+  });
 });
