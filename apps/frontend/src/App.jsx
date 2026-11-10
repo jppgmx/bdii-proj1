@@ -61,8 +61,10 @@ export default function App() {
   const [radius, setRadius] = useState(null);
   const bounds = useRef(null);
   const proximity = useRef(null);
+  const requestId = useRef(0);
 
   const [stopRequests] = useState(() => latestRequest(
+    requestId,
     (signal, bbox, filter) => api(stopsUrl(bbox, filter), { signal }),
     (items) => setStopList({ items }),
     (error) => setStopList({ items: [], error: error.message }),

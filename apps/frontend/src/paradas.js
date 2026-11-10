@@ -46,22 +46,27 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   return data;
 }
 
-export function latestRequest(request, onSuccess, onError) {
-  let current;
+export function latestRequest(requestId, request, onSuccess, onError) {
+  let controller;
 
   async function run(...args) {
-    current?.abort();
-    const controller = new AbortController();
-    current = controller;
+    const id = ++requestId.current;
+    controller?.abort();
+    controller = new AbortController();
     try {
       const result = await request(controller.signal, ...args);
-      if (!controller.signal.aborted) onSuccess(result);
+      if (id === requestId.current) onSuccess(result);
     } catch (error) {
-      if (!controller.signal.aborted) onError(error);
+      if (id === requestId.current) onError(error);
     }
   }
 
-  return { run, cancel: () => current?.abort() };
+  function cancel() {
+    requestId.current += 1;
+    controller?.abort();
+  }
+
+  return { run, cancel };
 }
 
 export function pointToLatLng({ coordinates: [lng, lat] }) {

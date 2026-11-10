@@ -41,6 +41,7 @@ test('descarta sucesso e erro atrasados ao mudar a área e limpar o filtro', asy
   const results = [];
   const errors = [];
   const requests = latestRequest(
+    { current: 0 },
     (signal, url) => new Promise((resolve, reject) => pending.push({ signal, url, resolve, reject })),
     (items) => results.push(items),
     (error) => errors.push(error),
