@@ -1,3 +1,5 @@
+import { createGeocoder } from './services/geocoding.js';
+import { createGeocodingRouter } from './routes/geocodingRouter.js';
 import express from 'express';
 import { createDomainRouter } from './routes/domainRouter.js';
 import { extname, join } from 'node:path';
@@ -7,13 +9,14 @@ import { createHealthRouter } from './routes/healthRouter.js';
 
 const defaultPublicDir = fileURLToPath(new URL('./public/', import.meta.url));
 
-export function createApp({ database, publicDir = defaultPublicDir, logger = console }) {
+export function createApp({ database, publicDir = defaultPublicDir, logger = console, geocoder = createGeocoder({ database }) }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '100kb' }));
 
   const api = express.Router();
   api.use('/health', createHealthRouter(database));
+  api.use('/geocodificacao', createGeocodingRouter(geocoder));
   api.use(createDomainRouter(database));
   api.use(notFound);
   app.use('/api', api);

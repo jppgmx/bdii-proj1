@@ -31,6 +31,10 @@ services:
       PG_USER: ${PG_USER:?Defina PG_USER no .env}
       PG_PASSWORD: ${PG_PASSWORD:?Defina PG_PASSWORD no .env}
       PG_SSL: "false"
+      GEOCODING_URL: ${GEOCODING_URL:-https://nominatim.openstreetmap.org/search}
+      GEOCODING_USER_AGENT: ${GEOCODING_USER_AGENT:-TransporteUniversitarioBDII/0.1 (https://github.com/jppgmx/bdii-proj1)}
+      GEOCODING_TIMEOUT_MS: ${GEOCODING_TIMEOUT_MS:-5000}
+      GEOCODING_CACHE_TTL_SECONDS: ${GEOCODING_CACHE_TTL_SECONDS:-86400}
     ports:
       - "${API_PORT:-3000}:3000"
     depends_on:
