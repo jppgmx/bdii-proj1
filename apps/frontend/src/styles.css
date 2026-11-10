@@ -1,0 +1,63 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f3f6f8;
+  color: #172b3a;
+  font-family: system-ui, sans-serif;
+}
+
+main {
+  max-width: 90rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+header {
+  margin-bottom: 1rem;
+}
+
+h1, h2, p {
+  margin: 0 0 0.5rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 21rem);
+  gap: 1rem;
+}
+
+.map {
+  min-height: 30rem;
+  background: #dde5ea;
+}
+
+aside {
+  padding: 1rem;
+  background: white;
+}
+
+fieldset {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 1rem 0 0;
+}
+
+input, select, button {
+  min-width: 0;
+  padding: 0.4rem;
+  font: inherit;
+}
+
+@media (max-width: 44rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .map {
+    min-height: 22rem;
+  }
+}
