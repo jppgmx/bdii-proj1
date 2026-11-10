@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import MapView from './MapView.jsx';
 import { api, latestRequest, pointToLatLng } from './paradas.js';
-import { UniversityForm, StopForm } from './Forms.jsx';
+import { LocationSearch, UniversityForm, StopForm } from './Forms.jsx';
 
 const connectionError = 'Não foi possível conectar à API.';
 const invalidResponse = 'A API retornou uma resposta de saúde inesperada.';
@@ -53,10 +53,12 @@ export default function App() {
   const [stopList, setStopList] = useState({ loading: true, items: [] });
   const [selected, setSelected] = useState(null);
   const [point, setPoint] = useState(null);
+  const [mapCenter, setMapCenter] = useState(null);
   const [formKey, setFormKey] = useState(0);
   const [newUniversity, setNewUniversity] = useState('');
   const [busy, setBusy] = useState(false);
   const bounds = useRef(null);
+  const pointBeforeSearch = useRef(undefined);
 
   const [stopRequests] = useState(() => latestRequest(
     (signal, bbox) => api(`/api/paradas?bbox=${bbox}`, { signal }),
@@ -86,15 +88,30 @@ export default function App() {
 
   const editStop = useCallback((stop) => {
     if (busy) return;
+    pointBeforeSearch.current = undefined;
     setSelected(stop);
     setPoint(pointToLatLng(stop.localizacao));
     setFormKey((key) => key + 1);
   }, [busy]);
 
   function resetStop() {
+    pointBeforeSearch.current = undefined;
     setSelected(null);
     setPoint(null);
     setFormKey((key) => key + 1);
+  }
+
+  function selectLocation(location) {
+    if (pointBeforeSearch.current === undefined) pointBeforeSearch.current = point;
+    const nextPoint = pointToLatLng(location);
+    setPoint(nextPoint);
+    setMapCenter(nextPoint);
+  }
+
+  function cancelLocation() {
+    if (pointBeforeSearch.current === undefined) return;
+    setPoint(pointBeforeSearch.current);
+    pointBeforeSearch.current = undefined;
   }
 
   function refreshStops() {
@@ -113,13 +130,15 @@ export default function App() {
         <p>Cajazeiras e Sousa · Paraíba</p>
       </header>
       <div className="layout">
-        <MapView stops={stopList.items} draft={point} onBounds={loadStops} onPoint={setPoint} onEdit={editStop} />
+        <MapView stops={stopList.items} draft={point} center={mapCenter}
+          onBounds={loadStops} onPoint={setPoint} onEdit={editStop} />
         <aside aria-labelledby="panel-title">
           <h2 id="panel-title">Painel</h2>
           <p role="status">{health}</p>
           {universityStatus.loading && <p role="status">Carregando universidades…</p>}
           {universityStatus.error && <p role="alert">{universityStatus.error}</p>}
           <UniversityForm onCreated={addUniversity} disabled={universityStatus.loading} />
+          <LocationSearch disabled={busy} onSelect={selectLocation} onCancel={cancelLocation} />
           <StopForm key={formKey} stop={selected} universities={universities} newUniversity={newUniversity}
             point={point} busy={busy} setBusy={setBusy} onReset={resetStop} onSaved={refreshStops} />
           <section className="stop-list" aria-labelledby="stop-list-title">
