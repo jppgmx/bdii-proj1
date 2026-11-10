@@ -4,15 +4,27 @@ Projeto da disciplina de Banco de Dados II para cadastrar paradas no mapa, consu
 
 **Integrantes:** João Paulo (backend e infraestrutura) e Millena Kelly (frontend).
 
-O React será configurado por Millena Kelly, responsável pelo frontend. O Dockerfile compilará esse projeto e o Express servirá os arquivos resultantes junto com a API, no mesmo endereço.
+## Tecnologias empregadas
+
+| Camada | Tecnologias e finalidade |
+| --- | --- |
+| Linguagem | JavaScript com módulos ES; JSX, HTML e CSS na interface. |
+| Frontend | React 19, Vite 8 e Leaflet 1.9 para interface, build e mapa interativo. |
+| Backend | Node.js 26 e Express 5 para a API HTTP e entrega do build do frontend. |
+| Persistência | Sequelize 6 e driver `pg` 8, com PostgreSQL 17 e PostGIS 3.6. |
+| Consultas espaciais | Pontos GeoJSON, índices GiST, filtro por área (`bbox`), `ST_DWithin` e `ST_Distance` para proximidade em metros. |
+| Serviços de mapa | Tiles do OpenStreetMap e busca de localidades pelo Nominatim, acessado pelo backend. |
+| Localização do usuário | API de geolocalização do navegador, mediante permissão. |
+| Configuração e execução | dotenv, npm com lockfiles, Docker e Docker Compose. |
+| Verificação e integração contínua | Test runner nativo do Node.js e GitHub Actions para testes do backend e integração com PostGIS. |
 
 ## Estado atual
 
-Branch `etapa-5`: backend de ônibus e posição manual implementado. O cadastro começa sem posição; o painel lista todos os ônibus, enquanto o mapa consulta somente posições dentro de um `bbox` obrigatório. A atualização manual salva ponto e horário do servidor na mesma operação.
+A interface React está implementada com mapa Leaflet, geolocalização, cadastro de universidades, criação/edição/exclusão de paradas, busca explícita de localidades e filtro de proximidade de 500 m, 1 km ou 2 km. As paradas são consultadas pela área visível do mapa; o filtro por raio usa a posição autorizada pelo navegador e combina raio e área visível.
 
-Universidades, CRUD espacial de paradas, proximidade e geocodificação Nominatim continuam disponíveis. O frontend permanece com Millena Kelly, incluindo cadastro, marcadores, salvar/cancelar posição e apresentação do horário. Nenhum arquivo de frontend foi alterado nesta etapa; não há rastreamento em tempo real.
+O backend oferece universidades, CRUD espacial de paradas, proximidade, geocodificação Nominatim e cadastro de ônibus com atualização manual da posição e do horário. A interface de ônibus ainda não está implementada no frontend atual ([issue #10](https://github.com/jppgmx/bdii-proj1/issues/10)); seus endpoints podem ser demonstrados pelos comandos deste README. Não há rastreamento em tempo real.
 
-O enunciado oficial ainda precisa ser conferido para confirmar publicação, banco na nuvem e prazo. A integração final e publicação pertencem à etapa 6 e dependem da entrega do frontend.
+O Dockerfile possui o alvo `production` para compilar o React e servir interface e API pelo Express no mesmo endereço. A validação final e publicação ([issue #11](https://github.com/jppgmx/bdii-proj1/issues/11)), a preparação da entrega ([issue #12](https://github.com/jppgmx/bdii-proj1/issues/12)) e a conferência do enunciado ([issue #13](https://github.com/jppgmx/bdii-proj1/issues/13)) continuam pendentes. A existência do build combinado não comprova publicação ou conclusão dessas etapas.
 
 ## Executar com Docker
 
@@ -20,11 +32,11 @@ Na raiz do projeto:
 
 ```bash
 cp .env.example .env
-docker compose up --build -d
+APP_BUILD_TARGET=production docker compose up --build -d
 curl http://localhost:3000/api/health
 ```
 
-O exemplo contém somente credenciais locais de desenvolvimento. Ajuste-as no `.env` e mantenha o arquivo fora do Git. O Compose inicia PostGIS e o alvo `backend`, que funciona sem React. `/api/health` deve retornar `{"status":"ok","database":"ok"}`. A interface em `/` retorna 404 até existir um build React.
+O exemplo contém somente credenciais locais de desenvolvimento. Ajuste-as no `.env` e mantenha o arquivo fora do Git. O comando acima inicia PostGIS e o alvo `production`, que inclui o React. Abra `http://localhost:3000` para acessar a interface. `/api/health` deve retornar `{"status":"ok","database":"ok"}`. Sem a seleção explícita de `production`, o Compose usa `APP_BUILD_TARGET` do `.env` (padrão `backend` em `.env.example`); esse alvo executa somente a API e `/` retorna 404 sem arquivos de frontend.
 
 O servidor só começa a escutar depois de conectar ao banco, aplicar as migrações e verificar PostGIS. A tabela `schema_migrations` registra as migrações aplicadas; repetir a inicialização não reaplica o que já foi concluído. O script `docker/postgres/init.sql` é executado apenas na primeira criação do volume; a migração também habilita a extensão em um banco externo com as permissões necessárias.
 
@@ -54,10 +66,12 @@ npm --prefix apps/backend run db:migrate
 
 ## Verificações
 
-Depois de instalar as dependências:
+Depois de instalar as dependências dos dois projetos (`npm --prefix apps/backend ci` e `npm --prefix apps/frontend ci`):
 
 ```bash
 npm --prefix apps/backend test
+npm --prefix apps/frontend test
+npm --prefix apps/frontend run build
 docker compose --env-file .env.example config --quiet
 ```
 
@@ -154,7 +168,7 @@ Configurações disponíveis em `.env.example`, também encaminhadas pelo Compos
 | `GEOCODING_TIMEOUT_MS` | 5000 ms; limite de 1 a 60000 ms. |
 | `GEOCODING_CACHE_TTL_SECONDS` | 86400 segundos; limite de 1 a 604800 segundos. |
 
-Millena Kelly deve manter visível `© OpenStreetMap contributors`, com link para [atribuição/licença](https://www.openstreetmap.org/copyright). A API inclui esse endereço no header `Link` com relação `license`. O endpoint pesquisa locais públicos e não restringe a busca à área do mapa.
+O mapa mantém visível `© OpenStreetMap contributors`, com link para [atribuição/licença](https://www.openstreetmap.org/copyright). A API inclui esse endereço no header `Link` com relação `license`. O endpoint pesquisa locais públicos e não restringe a busca à área do mapa.
 
 Os testes automáticos simulam o provedor e não acessam o serviço público. Para uma verificação manual de Cajazeiras e Sousa, com duas chamadas espaçadas:
 
@@ -162,15 +176,30 @@ Os testes automáticos simulam o provedor e não acessam o serviço público. Pa
 GEOCODING_LIVE_CHECK=1 bash scripts/validate-backend.sh
 ```
 
-## Integrar o React
+## Desenvolver o frontend e gerar o build integrado
 
-Millena Kelly entrega `apps/frontend/package.json`, lockfile e `npm run build` com saída em `dist/`. Depois dessa entrega, selecionar o alvo final:
+Com o banco e o backend iniciados conforme as instruções anteriores, em outro terminal:
+
+```bash
+npm --prefix apps/frontend ci
+npm --prefix apps/frontend run dev
+```
+
+Abra `http://localhost:5173`. O Vite já encaminha `/api` para `http://localhost:3000`. As chamadas do cliente usam caminhos relativos e não recebem credenciais do banco. A geolocalização depende da permissão do navegador e de um contexto seguro (HTTPS ou localhost). Mapa e busca pública de localidades precisam de acesso à internet.
+
+Para gerar somente os arquivos estáticos:
+
+```bash
+npm --prefix apps/frontend run build
+```
+
+O resultado fica em `apps/frontend/dist/`. Para executar interface e API juntas, use o alvo final:
 
 ```bash
 APP_BUILD_TARGET=production docker compose up --build -d
 ```
 
-O alvo `production` compila o React e copia `dist/` para `apps/backend/public/`. O Express hospeda frontend e API na mesma porta. No desenvolvimento, o React deve usar proxy de `/api` para `http://localhost:3000`, sem incluir credenciais do banco no cliente.
+O alvo `production` compila o React e copia `dist/` para `apps/backend/public/` dentro da imagem. O Express hospeda frontend e API na mesma porta, sem servidor Vite em produção. O build local sozinho não copia os arquivos para o backend local.
 
 ## Documentação
 
